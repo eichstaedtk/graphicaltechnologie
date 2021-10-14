@@ -34,19 +34,30 @@ function loadVertexData(context,data) {
 }
 
 function clearContextAndDraw(context) {
-    context.clearColor(0.0, 0.0, 0.0, 1.0);
+    context.clearColor(1, 1, 1, 1);
     context.clear(context.COLOR_BUFFER_BIT);
-    context.drawArrays(context.TRIANGLE_STRIP, 0, 4);
+    context.drawArrays(context.TRIANGLE_FAN , 0, 9);
 }
 
-const vertexSource = 'attribute vec2 pos;void main(){gl_Position = vec4(pos * 0.8, 0, 1); }'
-const fragmentSource = 'void main() { gl_FragColor = vec4(1.0, 0.0, 0.0, 0.5); }';
+const vertexSource = 'attribute vec2 pos;void main(){gl_Position = vec4(pos * 0.4, 0, 1); gl_PointSize = 10.0;}'
+const fragmentSource = 'void main() { gl_FragColor = vec4(0, 0, 0, 1); }';
 
 const gl = createWebGLContext('c')
 
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
-var vertices = new Float32Array([1, 1, -1, 1, 0.5, -0.5, -0.5, -0.5]);
+/**
+ * Quadrat Vertex
+ * @type {Float32Array}
+ */
+//var vertices = new Float32Array([1, 1, -1, 1, 0.5, -0.5, -0.5, -0.5]);
+
+/**
+ * Hause vom Nicolaus with Points
+ * @type {Float32Array}
+ */
+
+var vertices = new Float32Array([-1, -1, 1, -1, 1,1,  -1, 1, 0,2,1,1 ,-1, -1,-1,-1,1, 1,1]);
 
 loadVertexData(gl,vertices)
 
