@@ -58,19 +58,23 @@ var prog = linkProgramm(gl,vertexSource,fragmentSource)
  * @type {Float32Array}
  */
 
-var data = [-0.5, -0.45, 0.5, -0.45, 0.5, -0.45, 0.5, 0.45, 0.5, 0.45,-0.5,0.45,-0.5,0.45,-0.5,-0.45];
+function shiftData(data,shiftRight, shiftTop) {
+    return data.map((value,index) => {
+        return index%2===0 ? value + shiftRight : value+shiftTop;
+    })
+}
+
+var data = [-0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5,-0.5,0.5,-0.5,0.5,-0.5,-0.5];
 
 for(i=1;i>0;i=i-0.2) {
 
-    dataNew = data.map(x=>x*i)
-    data = data.concat(dataNew)
+    data = data.concat(shiftData(data,0.05,0.05)).concat(shiftData(data,-0.05,-0.05))
     console.log('Drawing the new vertices ')
     console.log(i)
     console.log(data)
 }
 
-var vertices = new Float32Array(data
-);
+var vertices = new Float32Array(data.concat(shiftData(data,0.05,0.05)));
 
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
