@@ -33,13 +33,14 @@ function loadVertexData(context,data) {
     context.bufferData(context.ARRAY_BUFFER, data, context.STATIC_DRAW);
 }
 
-function clearContextAndDraw(context) {
+function clearContextAndDraw(context,count) {
     context.clearColor(1, 1, 1, 1);
     context.clear(context.COLOR_BUFFER_BIT);
-    context.drawArrays(context.TRIANGLE_FAN , 0, 9);
+    context.lineWidth(10.0);
+    context.drawArrays(context.LINES , 0, count);
 }
 
-const vertexSource = 'attribute vec2 pos;void main(){gl_Position = vec4(pos * 0.4, 0, 1); gl_PointSize = 10.0;}'
+const vertexSource = 'attribute vec2 pos;void main(){gl_Position = vec4(pos, 0, 1);}'
 const fragmentSource = 'void main() { gl_FragColor = vec4(0, 0, 0, 1); }';
 
 const gl = createWebGLContext('c')
@@ -57,10 +58,24 @@ var prog = linkProgramm(gl,vertexSource,fragmentSource)
  * @type {Float32Array}
  */
 
-var vertices = new Float32Array([-1, -1, 1, -1, 1,1,  -1, 1, 0,2,1,1 ,-1, -1,-1,-1,1, 1,1]);
+var data = [-0.5, -0.45, 0.5, -0.45, 0.5, -0.45, 0.5, 0.45, 0.5, 0.45,-0.5,0.45,-0.5,0.45,-0.5,-0.45];
+
+for(i=1;i>0;i=i-0.2) {
+
+    dataNew = data.map(x=>x*i)
+    data = data.concat(dataNew)
+    console.log('Drawing the new vertices ')
+    console.log(i)
+    console.log(data)
+}
+
+var vertices = new Float32Array(data
+);
+
+var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
 loadVertexData(gl,vertices)
 
 bindVertex(gl,prog)
 
-clearContextAndDraw(gl)
+clearContextAndDraw(gl,vertices.length / 2)
