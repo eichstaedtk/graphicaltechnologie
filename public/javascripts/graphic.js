@@ -51,7 +51,7 @@ var prog = linkProgramm(gl,vertexSource,fragmentSource)
  * Quadrat Vertex
  * @type {Float32Array}
  */
-//var vertices = new Float32Array([1, 1, -1, 1, 0.5, -0.5, -0.5, -0.5]);
+//var vertices = new Float32Array([1, 1, -1, 1, 0.25, -0.25, -0.25, -0.25]);
 
 /**
  * Hause vom Nicolaus with Points
@@ -64,9 +64,10 @@ function shiftData(data,shiftRight, shiftTop) {
     })
 }
 
-var data = [-0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5,-0.5,0.5,-0.5,0.5,-0.5,-0.5];
+var data = [-0.25, -0.25, 0.25, -0.25, 0.25, -0.25, 0.25, 0.25, 0.25, 0.25,-0.25,0.25,-0.25,0.25,-0.25,-0.25,0.25,
+    0.25,0.9,0.25,0.9,0.25,0.9,-0.25,0.9,-0.25,0.25,-0.25,-0.25,0.25,0,0.5,0.25,0,0.5,0.25,0,0.5,0.7,0.5,0.7,0.5,0.9,0.25];
 
-for(i=1;i>0;i=i-0.2) {
+for(i=1;i>0;i=i-1) {
 
     data = data.concat(shiftData(data,0.05,0.05)).concat(shiftData(data,-0.05,-0.05))
     console.log('Drawing the new vertices ')
@@ -74,7 +75,7 @@ for(i=1;i>0;i=i-0.2) {
     console.log(data)
 }
 
-var vertices = new Float32Array(data.concat(shiftData(data,0.05,0.05)));
+var vertices = new Float32Array(data);
 
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
