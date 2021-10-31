@@ -58,22 +58,39 @@ var prog = linkProgramm(gl,vertexSource,fragmentSource)
  * @type {Float32Array}
  */
 
+function reduceSizeData(data,reduce) {
+    return data.map((value,index) => {
+        return value*reduce;
+    })
+}
+
 function shiftData(data,shiftRight, shiftTop) {
     return data.map((value,index) => {
         return index%2===0 ? value + shiftRight : value+shiftTop;
     })
 }
 
-var data = [-0.25, -0.25, 0.25, -0.25, 0.25, -0.25, 0.25, 0.25, 0.25, 0.25,-0.25,0.25,-0.25,0.25,-0.25,-0.25,0.25,
-    0.25,0.9,0.25,0.9,0.25,0.9,-0.25,0.9,-0.25,0.25,-0.25,-0.25,0.25,0,0.5,0.25,0,0.5,0.25,0,0.5,0.7,0.5,0.7,0.5,0.9,0.25];
-
-for(i=1;i>0;i=i-1) {
-
-    data = data.concat(shiftData(data,0.05,0.05)).concat(shiftData(data,-0.05,-0.05))
-    console.log('Drawing the new vertices ')
-    console.log(i)
-    console.log(data)
+function addData(data,newData) {
+    return data.concat(newData)
 }
+
+var brick = [-0.25, -0.25, 0.5, -0.25, 0.5, -0.25, 0.5, 0.25, 0.5, 0.25,-0.25,0.25,-0.25,0.25,-0.25,-0.25,
+    -0.25, 0.25, 0, 0.5, 0, 0.5,0.75,0.5,0.75,0.5,0.5, 0.25,
+    0.5,-0.25, 0.75,0,0.75,0,0.75, 0.5];
+
+var smallBrick = reduceSizeData(brick,0.5)
+
+var data = smallBrick
+
+data = addData(data,shiftData(smallBrick,0.25,-0.3))
+
+data = addData(data,shiftData(smallBrick,0.5,-0.6))
+
+data = addData(data,shiftData(smallBrick,0,-0.6))
+
+data = addData(data,shiftData(smallBrick,-0.5,-0.6))
+
+data = addData(data,shiftData(smallBrick,-0.25,-0.3))
 
 var vertices = new Float32Array(data);
 
