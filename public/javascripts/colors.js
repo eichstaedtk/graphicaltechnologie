@@ -63,11 +63,9 @@ const fragmentSource = 'precision mediump float;varying vec4 color;void main() {
 
 const gl = createWebGLContext('c')
 
-var vertices = new Float32Array([ 0,0,0, 1,0,0, 1,1,0,
-    0,1,0 ]);
-var colors = new Float32Array([ 1,0,0,1, 1,0,0,1,
-    0,0,1,1, 0,0,1,1 ]);
-var indices = new Uint16Array([ 0,1,2, 0,2,3 ]);
+var vertices = new Float32Array([ 0,0,0, 0.5,0,0, 0.5,0.5,0, 0,0.5,0, 0.25,0.75,0, 1,0,0, 1,0.5,0, 0.75,0.75,0]);
+var colors = new Float32Array([ 1,0,0,1, 0,1,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,1, 1,0,0,1, 1,0,0,1, 0,0,1,1]);
+var indices = new Uint16Array([ 0,1,3, 3,2,1, 2,4,3, 1,5,2, 5,6,2, 6,7,2, 2,7,4]);
 
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
