@@ -55,7 +55,7 @@ function setupIndex(context, indices) {
 
 function clearContextAndDraw(context,elements) {
     context.clear(context.COLOR_BUFFER_BIT);
-    context.drawElements(context.TRIANGLE_FAN , elements, gl.UNSIGNED_SHORT, 0);
+    context.drawElements(context.TRIANGLES , elements, gl.UNSIGNED_SHORT, 0);
 }
 
 const vertexSource = 'attribute vec3 pos;attribute vec4 col;varying vec4 color;void main(){color = col;gl_Position = vec4(pos-0.5, 1);}'
@@ -63,10 +63,49 @@ const fragmentSource = 'precision mediump float;varying vec4 color;void main() {
 
 const gl = createWebGLContext('c')
 
-var vertices = new Float32Array([ 0,0,0, 0.5,0,0, 0.5,0.5,0, 0,0.5,0, 0.25,0.75,0, 1,0,0, 1,0.5,0, 0.75,0.75,0]);
-var colors = new Float32Array([ 1,0,0,1, 0,1,0,1, 0,0,1,0, 1,0,0,1, 0,0,1,1, 1,0,0,1, 1,0,0,1, 0,0,1,1]);
-var indices = new Uint16Array([ 0,1,3, 3,2,1, 2,4,3, 1,5,2, 5,6,2, 6,7,2, 2,7,4]);
+function shiftData(data,shiftRight, shiftTop) {
+    return data.map((value,index) => {
+        return (index)%3===0 ? value + shiftRight : value+shiftTop;
+    })
+}
 
+function addData(data,newData) {
+    return data.concat(newData)
+}
+
+var smallQuader = [ 0,0,0, 0.25,0,0, 0.25,0.25,0, 0,0.25,0];
+var smallTriangle = [ 0,0,0, 0.25,0,0, 0.25,0.25,0,];
+var smallTriangleBackwards = [ 0,0.25,0, 0,0,0, 0,0.25,0,];
+
+var blue3Points = [0,0,1,1, 0,0,1,1, 0,0,1,1]
+var yellow3Points = [1,1,0,1, 1,1,0,1, 1,1,0,1]
+var blue4Points = [0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1]
+var yellow4Points = [1,1,0,1, 1,1,0,1, 1,1,0,1, 1,1,0,1]
+var red4Points = [1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1]
+
+var data = smallQuader
+var colorData = blue4Points
+
+data = addData(data,shiftData(smallQuader,0.25,0))
+data = addData(data,shiftData(smallQuader,0.5,0))
+data = addData(data,shiftData(smallQuader,0,0.25))
+data = addData(data,shiftData(smallQuader,0.25,0.25))
+data = addData(data,shiftData(smallQuader,0.5,0.25))
+data = addData(data,shiftData(smallTriangle,0,0.5))
+
+colorData = addData(colorData,yellow4Points)
+colorData = addData(colorData,red4Points)
+colorData = addData(colorData,red4Points)
+colorData = addData(colorData,blue4Points)
+colorData = addData(colorData,yellow4Points)
+
+colorData = addData(colorData,blue3Points)
+
+console.log(data)
+
+var vertices = new Float32Array(data);
+var colors = new Float32Array(colorData);
+var indices = new Uint16Array([ 0,1,2, 0,2,3, 4,5,6, 4,6,7, 8,9,10, 8,10,11 ,12,13,14, 12,14,15, 16,17,18, 16,18,19, 20,21,22, 20,22,23, 24,25,26, 26,25,18 ]);
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
 loadVertexData(gl,vertices,prog)
