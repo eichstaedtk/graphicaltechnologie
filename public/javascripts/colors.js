@@ -73,6 +73,7 @@ function addData(data,newData) {
     return data.concat(newData)
 }
 
+var door = [ 0.125,0,0, 0.375,0,0, 0.375,0.375,0, 0.125,0.375,0];
 var smallQuader = [ 0,0,0, 0.25,0,0, 0.25,0.25,0, 0,0.25,0];
 var smallTriangle = [ 0,0,0, 0.25,0,0, 0.25,0.25,0,];
 var smallTriangleBackwards = [ 0,0.25,0, 0,0,0, 0,0.25,0,];
@@ -82,6 +83,7 @@ var yellow3Points = [1,1,0,1, 1,1,0,1, 1,1,0,1]
 var blue4Points = [0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1]
 var yellow4Points = [1,1,0,1, 1,1,0,1, 1,1,0,1, 1,1,0,1]
 var red4Points = [1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1]
+var white4Points = [1,1,1,1, 1,1,1,1, 1,1,0.5,1, 1,1,0.5,1]
 
 var data = smallQuader
 var colorData = blue4Points
@@ -92,20 +94,30 @@ data = addData(data,shiftData(smallQuader,0,0.25))
 data = addData(data,shiftData(smallQuader,0.25,0.25))
 data = addData(data,shiftData(smallQuader,0.5,0.25))
 data = addData(data,shiftData(smallTriangle,0,0.5))
+data = addData(data,door)
+data = addData(data,shiftData(smallQuader,0.75,0))
+data = addData(data,shiftData(smallQuader,0.75,0.25))
+data = addData(data,shiftData(smallQuader,0.625,0.125))
 
-colorData = addData(colorData,yellow4Points)
-colorData = addData(colorData,red4Points)
 colorData = addData(colorData,red4Points)
 colorData = addData(colorData,blue4Points)
-colorData = addData(colorData,yellow4Points)
+colorData = addData(colorData,red4Points)
+colorData = addData(colorData,blue4Points)
+colorData = addData(colorData,red4Points)
 
 colorData = addData(colorData,blue3Points)
+colorData = addData(colorData,white4Points)
+
+colorData = addData(colorData,yellow4Points)
+colorData = addData(colorData,blue4Points)
+colorData = addData(colorData,white4Points)
 
 console.log(data)
 
 var vertices = new Float32Array(data);
 var colors = new Float32Array(colorData);
-var indices = new Uint16Array([ 0,1,2, 0,2,3, 4,5,6, 4,6,7, 8,9,10, 8,10,11 ,12,13,14, 12,14,15, 16,17,18, 16,18,19, 20,21,22, 20,22,23, 24,25,26, 26,25,18 ]);
+var indices = new Uint16Array([ 0,1,2, 0,2,3, 4,5,6, 4,6,7, 8,9,10, 8,10,11 ,12,13,14, 12,14,15, 16,17,18, 16,18,19, 20,21,22, 20,22,23, 24,25,26, 26,25,18, 27,28,29, 27,29,30,
+    31,32,33, 31,33,34, 35,36,37, 35,37,38, 39,40,41, 39,41,42]);
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
 
 loadVertexData(gl,vertices,prog)
