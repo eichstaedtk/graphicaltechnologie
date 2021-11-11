@@ -32,6 +32,14 @@ function loadVertexColor(context,program, x, y, z, w) {
     context.vertexAttrib4f(colAttrib, x,y,z,w);
 }
 
+function loadVertexColorVector(context,colors,program) {
+    var vboCol = context.createBuffer();
+    context.bindBuffer(context.ARRAY_BUFFER, vboCol);
+    context.bufferData(context.ARRAY_BUFFER, colors, context.STATIC_DRAW);
+    var colAttrib = context.getAttribLocation(program, 'col');
+    context.vertexAttribPointer(colAttrib, 4, context.FLOAT, false, 0, 0);
+}
+
 function loadVertexData(context,data, program) {
     var vbo = context.createBuffer();
     context.bindBuffer(context.ARRAY_BUFFER, vbo);
@@ -62,49 +70,53 @@ const fragmentSource = 'precision mediump float;varying vec4 color;void main() {
 const gl = createWebGLContext('c')
 
 var vertices, indicesLines, indicesTris;
-var colors = new Float32Array();
+var colors;
 
 function createVertexData(){
-    var n = 32;
-    var m = 5;
+    var n = 64;
+    var m = 18;
     // Positions.
-    vertices = new Float32Array(3 * (n+1) * (m+1));
-    // Index data.
+    vertices = new Float32Array(3*(n+1)*(m+1));
+    // Index data for Linestrip.
     indicesLines = new Uint16Array(2 * 2 * n * m);
-    indicesTris  = new Uint16Array(3 * 2 * n * m);
+    indicesTris = new Uint16Array(3 * 3 * n * m);
+    colors =  new Float32Array(4 * 4 * n * m);
 
     var dt = 2*Math.PI/n;
-    var dr = 1/m;
+    var dr = 1/32;
     // Counter for entries in index array.
-    var iLines = 0;
+    var iIndex = 0;
     var iTris = 0;
 
     // Loop angle t.
     for(var i=0, t=0; i <= n; i++, t += dt) {
         // Loop radius r.
-        for(var j=0, r=0; j <= m; j++, r += dr){
+        for(var j=0, r=0; j <= m; j++, r += dr) {
 
             var iVertex = i*(m+1) + j;
 
-            var x = r * Math.cos(t);
-            var y = r * Math.sin(t);
-            var z = 0;
+            var x = Math.cos(t);
+            var z = Math.cos(j);
+            var y = r * Math.sin(t) * Math.sin(j)
 
             // Set vertex positions.
             vertices[iVertex * 3] = x;
             vertices[iVertex * 3 + 1] = y;
             vertices[iVertex * 3 + 2] = z;
 
-            // Set index.
-            // Line on beam.
+            colors[iVertex * 3 + 3] = t / (2*Math.PI);
+            colors[iVertex * 3 + 4] = 0.5 * Math.cos(j);
+            colors[iVertex * 3 + 5] = 1;
+            colors[iVertex * 3 + 6] = 1;
+
             if(j>0 && i>0){
-                indicesLines[iLines++] = iVertex - 1;
-                indicesLines[iLines++] = iVertex;
+                indicesLines[iIndex++] = iVertex - 1;
+                indicesLines[iIndex++] = iVertex;
             }
             // Line on ring.
             if(j>0 && i>0){
-                indicesLines[iLines++] = iVertex - (m+1);
-                indicesLines[iLines++] = iVertex;
+                indicesLines[iIndex++] = iVertex - (m+1);
+                indicesLines[iIndex++] = iVertex;
             }
 
             // Set index.
@@ -131,12 +143,17 @@ loadVertexData(gl,vertices,prog)
 var elementsLines = setupIndex(gl,indicesLines)
 var elementsTris = setupIndex(gl,indicesTris)
 
-gl.clear(context.COLOR_BUFFER_BIT);
-
-loadVertexColor(gl,prog,0,1,1,1)
+//loadVertexColor(gl,prog,1,0,0,0.5)
+loadVertexColorVector(gl,colors,prog)
 
 clearContextAndDraw(gl,elementsTris,gl.TRIANGLES)
 
-loadVertexColor(gl,prog,0,0,1,1)
+//gl.clear(context.COLOR_BUFFER_BIT);
+
+loadVertexColor(gl,prog,0,0,0,1)
 
 clearContextAndDraw(gl,elementsLines,gl.LINES)
+
+//loadVertexColor(gl,prog,0,0,1,1)
+
+//clearContextAndDraw(gl,elementsLines,gl.LINES)
