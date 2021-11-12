@@ -74,8 +74,8 @@ var vertices, indicesLines, indicesTris;
 var colors;
 
 function createVertexData(){
-    var n = 32  ;
-    var m = 20;
+    var n = 24;
+    var m = 13;
     // Positions.
     var verticesCountOfOneObject = (n+1)*(m+1)
     vertices = new Float32Array(3*(4+3)*verticesCountOfOneObject);
@@ -144,7 +144,7 @@ function createVertexData(){
             var iVertex = 2 * verticesCountOfOneObject + i*(m+1) + j;
 
             var x =  0.2 * Math.cos(t);
-            var y =  r-0.2 * Math.sin(t)-1.1;
+            var y =  r-0.2 * Math.sin(t)-0.95;
             var z = 0
 
             // Set vertex positions.
