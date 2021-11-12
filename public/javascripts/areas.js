@@ -90,7 +90,6 @@ function createVertexData(){
     var iIndex = 0;
     var iTris = 0;
 
-    // Loop angle t.
     for(var i=0, t=Math.PI/17; i <= n; i++, t += dt) {
         // Loop radius r.
         for(var j=0, r=0; j <= m; j++, r += dr) {
@@ -98,7 +97,7 @@ function createVertexData(){
             var iVertex = i*(m+1) + j;
 
             var x = Math.cos(t);
-            var z = Math.cos(j)+0.5;
+            var z = r * Math.cos(j)+0.5;
             var y = r * Math.sin(t) * Math.sin(j) + 0.5
 
             // Set vertex positions.
@@ -106,10 +105,57 @@ function createVertexData(){
             vertices[iVertex * 3 + 1] = y;
             vertices[iVertex * 3 + 2] = z;
 
-            colors[iVertex * 3 +3] = 0.5;
-            colors[iVertex * 3 +4] = 0.5;
-            colors[iVertex * 3 +5] = 1;
-            colors[iVertex * 3 +6] = 1;
+            colors[iVertex * 5 +3] = 0.5;
+            colors[iVertex * 5 +4] = 0.5;
+            colors[iVertex * 5 +5] = 0.5;
+            colors[iVertex * 5 +6] = 0.5;
+
+            if(j>0 && i>0){
+                indicesLines[iIndex++] = iVertex - 1;
+                indicesLines[iIndex++] = iVertex;
+            }
+            // Line on ring.
+            if(j>0 && i>0){
+                indicesLines[iIndex++] = iVertex - (m+1);
+                indicesLines[iIndex++] = iVertex;
+            }
+
+            // Set index.
+            // Two Triangles.
+            if(j>0 && i>0){
+                indicesTris[iTris++] = iVertex;
+                indicesTris[iTris++] = iVertex - 1;
+                indicesTris[iTris++] = iVertex - (m+1);
+                //
+                indicesTris[iTris++] = iVertex - 1;
+                indicesTris[iTris++] = iVertex - (m+1) - 1;
+                indicesTris[iTris++] = iVertex - (m+1);
+            }
+        }
+    }
+
+    var dr = 1/35;
+    var dt = 3 * Math.PI/n;
+
+    for(var i=0, t=0.7*Math.PI; i <= n; i++, t += dt) {
+        // Loop radius r.
+        for(var j=0, r=0; j <= m; j++, r += dr) {
+
+            var iVertex = 2 * verticesCountOfOneObject + i*(m+1) + j;
+
+            var x =  0.2 * Math.cos(t);
+            var y =  r-0.2 * Math.sin(t)-1.1;
+            var z = 0
+
+            // Set vertex positions.
+            vertices[iVertex * 3 ] = x;
+            vertices[iVertex * 3 + 1] = y;
+            vertices[iVertex * 3 + 2] = z;
+
+            colors[iVertex * 5 +3] = 0.5;
+            colors[iVertex * 5 +4] = 0.5;
+            colors[iVertex * 5 +5] = 0.5;
+            colors[iVertex * 5 +6] = 1;
 
             if(j>0 && i>0){
                 indicesLines[iIndex++] = iVertex - 1;
@@ -144,15 +190,15 @@ function createVertexData(){
             var iVertex = verticesCountOfOneObject + i*(m+1) + j;
 
             var x = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.cos(t) / 1.3;
-            var y = 0.32 - (r/1.5) -0.6;
-            var z = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.sin(t) -0.6;
+            var y = 0.32 - (r/1.5);
+            var z = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.sin(t);
 
             // Set vertex positions.
             vertices[iVertex * 3 ] = x;
             vertices[iVertex * 3 + 1] = y;
             vertices[iVertex * 3 + 2] = z;
 
-            colors[iVertex * 5 +3] = 0.5;
+            colors[iVertex * 5 +3] = 1;
             colors[iVertex * 5 +4] = 0.5;
             colors[iVertex * 5 +5] = 1;
             colors[iVertex * 5 +6] = 1;
@@ -180,6 +226,7 @@ function createVertexData(){
             }
         }
     }
+
 }
 
 var prog = linkProgramm(gl,vertexSource,fragmentSource)
