@@ -246,20 +246,10 @@ loadVertexData(gl,vertices,prog)
 
 var elementsLines = setupIndex(gl,indicesLines)
 var elementsTris = setupIndex(gl,indicesTris)
-
-console.log('Vertices')
-console.log(vertices)
-
-console.log('Color')
-console.log(colors)
-
-console.log('Tris Indices')
-console.log(indicesTris)
-
 var colAttribute = context.getAttribLocation(prog, 'col')
+
 gl.clear(gl.COLOR_BUFFER_BIT);
 
-//loadVertexColor(gl,prog,1,0,0,0.5)
 loadVertexColorVector(gl,colors,prog)
 
 clearContextAndDraw(gl,elementsTris,gl.TRIANGLES)
