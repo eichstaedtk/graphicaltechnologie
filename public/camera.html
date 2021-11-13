@@ -3,12 +3,38 @@
 <head>
   <title>WEB GL on Canvas</title>
   <link rel="stylesheet" href="stylesheets/style.css">
-  <script rel="script" src="javascripts/gl-matrix-min.js"></script>
-  <script rel="script" src="javascripts/camera.js" defer></script>
   <meta charset="utf-8">
+  <script src="javascripts/gl-matrix.js"></script>
+  <script src="javascripts/camera.js"></script>
+  <script src="javascripts/camera-app.js"></script>
+  <script type="x-shader/x-vertex" id="vertexshader">
+            attribute vec3 aPosition;
+            attribute vec3 aNormal;
+
+            uniform mat4 uPMatrix;
+            uniform mat4 uMVMatrix;
+
+            varying vec4 vColor;
+
+            void main(){
+                gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+
+                vColor = vec4(aNormal.x, aNormal.y, aNormal.z, 1.0);
+                vColor = (vColor + 1.0) / 2.0;
+            }
+  </script>
+  <script type="x-shader/x-fragment" id="fragmentshader">
+            precision mediump float;
+            varying vec4 vColor;
+
+            void main() {
+                gl_FragColor = vColor;
+            }
+  </script>
+
 </head>
 
-<body>
+<body onload="app.start()">
 <section>
   <h1>EA 6 - Kamerabewegung  Konrad Eichstädt THB</h1>
   <section>
