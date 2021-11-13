@@ -129,7 +129,7 @@ function generateBallData() {
     }
 }
 
-function generateCylData() {
+function generateCylinderData() {
     var dr = 1/35;
     var dt = 3 * Math.PI/n;
 
@@ -232,7 +232,7 @@ function createVertexData(){
 
     generateBallData();
 
-    generateCylData();
+    generateCylinderData();
 
     generateDropData();
 
