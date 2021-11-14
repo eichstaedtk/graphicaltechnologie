@@ -34,6 +34,7 @@ var app = (function(){
   function start() {
     console.log('Starting the Engine ... ')
     init();
+    render();
   }
 
   function init() {
@@ -111,10 +112,11 @@ var app = (function(){
   function initModels() {
     // fill-style
     var fs = "fillwireframe";
-    createModel("torus", fs);
+    createModel("ball", fs);
   }
 
   function createModel(geometryname, fillstyle) {
+    console.log('Create Model for '+geometryname)
     var model = {};
     model.fillstyle = fillstyle;
     initDataAndBuffers(model, geometryname);
@@ -125,12 +127,13 @@ var app = (function(){
   }
 
   function initDataAndBuffers(model, geometryname) {
+    console.log('Init Data Buffer '+geometryname)
     // Provide model object with vertex data arrays.
     // Fill data arrays for Vertex-Positions, Normals, Index data:
     // vertices, normals, indicesLines, indicesTris;
     // Pointer this refers to the window.
     this[geometryname]['createVertexData'].apply(model);
-
+    console.log(model)
     // Setup position vertex buffer object.
     model.vboPos = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
@@ -185,6 +188,7 @@ var app = (function(){
   }
 
   function render() {
+    console.log('Rendering ....')
     // Clear framebuffer and depth-/z-buffer.
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -219,6 +223,9 @@ var app = (function(){
 
   function draw(model) {
     // Setup position VBO.
+    console.log('Draw Model')
+    console.log(model)
+
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
     gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,0,0);
 
