@@ -15,7 +15,7 @@ var app = (function(){
     // Opening angle given in radian.
     // radian = degree*2*PI/360.
     fovy : 60.0 * Math.PI / 180,
-    // Camera near plane dimensions:
+    // Camera near grid dimensions:
     // value for left right top bottom in projection.
     lrtb : 2.0,
     // View matrix.
@@ -114,7 +114,7 @@ var app = (function(){
     var fs = "fillwireframe";
     createModel("ball", fs);
     createModel("kegel", fs);
-    createModel("plane", "wireframe");
+    createModel("grid", "wireframe");
   }
 
   function createModel(geometryname, fillstyle) {

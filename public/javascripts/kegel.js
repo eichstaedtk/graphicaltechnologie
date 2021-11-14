@@ -261,7 +261,7 @@ var kegel = ( function() {
         console.log('Create Data for Ball')
         // Positions.
         var n = 32;
-        var m = 20;
+        var m = 16;
 
         this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
         var vertices = this.vertices;
