@@ -254,14 +254,14 @@ loadVertexColor(gl,prog,0,0,1,1)
 clearContextAndDraw(gl,elementsLines,gl.LINES)
 */
 
-var ball = ( function() {
+var kegel = ( function() {
 
     function createVertexData() {
 
         console.log('Create Data for Ball')
         // Positions.
         var n = 32;
-        var m = 16;
+        var m = 20;
 
         this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
         var vertices = this.vertices;
@@ -274,8 +274,8 @@ var ball = ( function() {
         this.indicesTris = new Uint16Array(3 * 2 * n * m);
         var indicesTris = this.indicesTris;
 
-        var dr = Math.PI/m;
-        var dt = 2*Math.PI/n;
+        var dr = Math.PI / m;
+        var dt = 2 * Math.PI / n;
         // Counter for entries in index array.
         var iIndex = 0;
         var iTris = 0;
@@ -286,18 +286,18 @@ var ball = ( function() {
 
                 var iVertex = i * (m + 1) + j;
 
-                var x = 0.4 * Math.sin(r)* Math.cos(t);
-                var z = 0.4 * Math.sin(r)* Math.cos(t);
-                var y = 0.4 * Math.cos(r) +0.4;
+                var x = r * Math.cos(t);
+                var z = r * Math.sin(t);
+                var y = -r - 0.4;
 
                 // Set vertex positions.
                 vertices[iVertex * 3] = x;
                 vertices[iVertex * 3 + 1] = y;
                 vertices[iVertex * 3 + 2] = z;
 
-                var nx = Math.sin(r)* Math.cos(t);
-                var ny = Math.sin(r)* Math.cos(t);
-                var nz = Math.cos(r);
+                var nx = r * Math.cos(t);
+                var ny = r * Math.sin(t);
+                var nz = -r
                 normals[iVertex * 3] = nx;
                 normals[iVertex * 3 + 1] = ny;
                 normals[iVertex * 3 + 2] = nz;

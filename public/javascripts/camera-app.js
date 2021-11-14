@@ -113,6 +113,8 @@ var app = (function(){
     // fill-style
     var fs = "fillwireframe";
     createModel("ball", fs);
+    createModel("kegel", fs);
+    createModel("plane", "wireframe");
   }
 
   function createModel(geometryname, fillstyle) {
@@ -168,17 +170,56 @@ var app = (function(){
   }
 
   function initEventHandler() {
+    var deltaRotate = Math.PI / 36;
+    var deltaTranslate = 0.05;
 
     window.onkeydown = function(evt) {
+      // Use shift key to change sign.
+      var sign = evt.shiftKey ? -1 : 1;
       var key = evt.which ? evt.which : evt.keyCode;
       var c = String.fromCharCode(key);
-      // console.log(evt);
+      console.log('Getting Key Event')
+      console.log(evt);
 
       // Change projection of scene.
       switch(c) {
         case('O'):
-          camera.projectionType = "ortho";
+          camera.projectionType = "ortho"; // Turn on the othoganl view mode on, with keytrokes W, S, A, B and D
           camera.lrtb = 2;
+          break;
+        case('F'):
+          camera.projectionType = "frustum"; // Turn on the frustum view mode on, where keytroke B and Shift+B can be used
+          break;
+        case('P'):
+          camera.projectionType = "perspective"; //Turn the perspektiv view mode on, with additional keytroke V and Shift+V, but keystroke B is not working
+          break;
+        case('W'):
+          camera.eye[1] += deltaTranslate; //Move the camera to the top
+          break;
+        case('S'):
+          camera.eye[1] -= deltaTranslate; //Move the camera to the bottom
+          break;
+        case('A'):
+          camera.zAngle += deltaRotate; //Move the camera to the left
+          break;
+        case('D'):
+          camera.zAngle -= deltaRotate; //Move the camera to the right
+          break;
+        case('C'):
+          // Orbit camera.
+          camera.zAngle += sign * deltaRotate; //Keystroke C has the same movement of the camera as keystroke A and Shift+C has the same movement of the camera as keystroke D
+          break;
+        case('Q'):
+          camera.distance -= sign * deltaTranslate; //Keystroke Q changes the distance of the camera to the point it looks at
+          break;
+        case('E'):
+          camera.distance += sign * deltaTranslate; //Keystroke E changes the distance of the camera to the point it looks at in the opposite direction to Q
+          break;
+        case('V'):
+          camera.fovy += sign * 5 * Math.PI / 180; //Keystroke V and Shift+V changes the perspective view only in perspective mode (turn on perspective mode with keystroke P)
+          break;
+        case('B'):
+          camera.lrtb += sign * 0.1; //Keystroke B and Shift+B changes the left right top bottom
           break;
       }
 
@@ -194,7 +235,13 @@ var app = (function(){
 
     setProjection();
 
-    mat4.identity(camera.vMatrix);
+    camera.eye[0] = camera.center[0];
+    camera.eye[2] = camera.center[2];
+    camera.eye[0] += camera.distance * Math.sin(camera.zAngle);
+    camera.eye[2] += camera.distance * Math.cos(camera.zAngle);
+
+    // lookAt calculates the view Matrix with initial camera position with look at point, where also the roll and pitch of the camera is defined
+    mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
     // Loop over models.
     for(var i = 0; i < models.length; i++) {
@@ -212,9 +259,17 @@ var app = (function(){
   function setProjection() {
     // Set projection Matrix.
     switch(camera.projectionType) {
-      case("ortho"):
+      case("ortho"): //here the orthogonal view mode ist set up, where the projection matrix is calculated
         var v = camera.lrtb;
         mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
+        break;
+      case("frustum"): //here the furstum view mode ist set up, where the projection matrix is calculated
+        var v = camera.lrtb;
+        mat4.frustum(camera.pMatrix, -v/2, v/2, -v/2, v/2, 1, 10);
+        break;
+      case("perspective"): //here the perspective view mode ist set up, where the projection matrix is calculated
+        mat4.perspective(camera.pMatrix, camera.fovy,
+            camera.aspect, 1, 10);
         break;
     }
     // Set projection uniform.
