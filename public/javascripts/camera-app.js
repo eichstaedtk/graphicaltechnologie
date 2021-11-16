@@ -112,6 +112,7 @@ var app = (function(){
   function initModels() {
     // fill-style
     var fs = "fillwireframe";
+    createModel("ballMesh", fs);
     createModel("ball", fs);
     createModel("kegel", fs);
     createModel("grid", "wireframe");

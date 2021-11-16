@@ -32,7 +32,7 @@ var ball = ( function() {
 
                 var x = 0.4 * Math.sin(r)* Math.cos(t);
                 var z = 0.4 * Math.sin(r)* Math.sin(t);
-                var y = 0.4 * Math.cos(r)+0.6;
+                var y = 0.4 * Math.cos(r)+0.8;
 
                 // Set vertex positions.
                 vertices[iVertex * 3] = x;
