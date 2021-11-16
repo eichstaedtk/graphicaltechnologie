@@ -8,25 +8,26 @@ var ballMesh = ( function() {
         var normalIndex = 0;
         var trisIndex = 0;
         var linesIndex = 0;
-        var recursionLevel = 10;
+        var recursionLevel = 1;
+        var pointMap = new Map();
 
-        this.vertices = new Float32Array(recursionLevel * 3 * 12);
+        this.vertices = new Float32Array(recursionLevel * 20 * 3 * 12);
         var vertices = this.vertices;
         // Normals.
-        this.normals = new Float32Array(recursionLevel * 3 *12);
+        this.normals = new Float32Array(recursionLevel * 20 * 3 *12);
         var normals = this.normals;
         // Index data.
         this.indicesLines = new Uint16Array(recursionLevel * 2 * 16 * 3);
         var indicesLines = this.indicesLines;
-        this.indicesTris = new Uint16Array(recursionLevel * 3 * 20);
+        this.indicesTris = new Uint16Array(recursionLevel * 12 * 3 * 20);
         var indicesTris = this.indicesTris;
 
 
-        function addVertex(x,y,z) {
+        function addVertex(x,y,z, pointNumber) {
             vertices[verticesIndex++] = x*0.2;
             vertices[verticesIndex++] = y*0.2;
             vertices[verticesIndex++] = z*0.2;
-
+            pointMap.set(pointNumber,[x*0.2,y*0.2,z*0.2])
         }
 
         function addNormal(x,y,z) {
@@ -48,26 +49,34 @@ var ballMesh = ( function() {
         }
 
         function getMiddlePoint(p1, p2){
-            return (p1 + p2) / 2
+
+            var pointNumber = pointMap.size+1
+
+            addVertex(((p1[0]+p2[0])/2),((p1[1]+p2[1])/2),((p1[2]+p2[2])/2),pointNumber)
+            addNormal(((p1[0]+p2[0])/2),((p1[1]+p2[1])/2),((p1[2]+p2[2])/2))
+
+            console.log('Get Middle Point '+pointNumber)
+
+            return pointNumber;
         }
 
 
         var t = (1.0 + Math.sqrt(5.0)) / 2.0;
 
-        addVertex(-1,  t,  0);
-        addVertex( 1,  t,  0);
-        addVertex(-1, -t,  0);
-        addVertex(1, -t,  0);
+        addVertex(-1,  t,  0,0);
+        addVertex( 1,  t,  0,1);
+        addVertex(-1, -t,  0,2);
+        addVertex(1, -t,  0,3);
 
-        addVertex( 0, -1,  t);
-        addVertex(0,  1,  t);
-        addVertex(0, -1, -t);
-        addVertex(0,  1, -t);
+        addVertex( 0, -1,  t,4);
+        addVertex(0,  1,  t,5);
+        addVertex(0, -1, -t,6);
+        addVertex(0,  1, -t,7);
 
-        addVertex( t,  0, -1);
-        addVertex( t,  0,  1);
-        addVertex(-t,  0, -1);
-        addVertex(-t,  0,  1);
+        addVertex( t,  0, -1,8);
+        addVertex( t,  0,  1,9);
+        addVertex(-t,  0, -1,10);
+        addVertex(-t,  0,  1,11);
 
         //Normal
 
@@ -182,38 +191,41 @@ var ballMesh = ( function() {
         {
 
             console.log('Building mesh with recursion '+i)
-            var vertexCount = 0 ;
+            var indicesTris2 = this.indicesTris;
 
-            vertices.forEach(function (element, index) {
-                // replace triangle by 4 triangles
+            indicesTris.forEach(function (element, index) {
 
-                if(index % 3 === 0 && vertices[index+5]) {
+                if(index % 3 === 0 && indicesTris[index+2]) {
 
-                    console.log('Add new Vertex')
+                    var a = getMiddlePoint(pointMap.get(indicesTris[index]),
+                        pointMap.get(indicesTris[index + 1]));
+                    var b = getMiddlePoint(pointMap.get(indicesTris[index + 1]),
+                        pointMap.get(indicesTris[index + 2]));
+                    var c = getMiddlePoint(pointMap.get(indicesTris[index + 2]),
+                        pointMap.get(indicesTris[index]));
 
-                    var a = getMiddlePoint(vertices[index],
-                        vertices[index + 3]);
-                    var b = getMiddlePoint(vertices[index + 1],
-                        vertices[index + 4]);
-                    var c = getMiddlePoint(vertices[index + 2],
-                        vertices[index + 5]);
+                    indicesTris2[indicesTris2.length] = pointMap.get(
+                        indicesTris[index])
+                    indicesTris2[indicesTris2.length + 1] = a
+                    indicesTris2[indicesTris2.length + 2] = c
 
-                    console.log('Add new Vertex')
-                    console.log([a,b,c])
-                    addVertex(a, b, c)
-                    addNormal(a,b,c)
-                    vertexCount++
+                    indicesTris2[indicesTris2.length + 3] = pointMap.get(
+                        indicesTris[index + 1])
+                    indicesTris2[indicesTris2.length + 4] = b
+                    indicesTris2[indicesTris2.length + 5] = a
 
-                    if(vertexCount === 3) {
-                        addTrisIndices(vertices.length / 3 - 4, vertices.length / 3 - 3, vertices.length / 3 - 2);
-                        addLinesIndices(vertices.length / 3 - 4,vertices.length / 3 - 3)
-                        addLinesIndices(vertices.length / 3 - 4,vertices.length / 3 - 2)
-                        addLinesIndices(vertices.length / 3 - 2,vertices.length / 3 - 4)
-                        vertexCount = 0;
-                    }
+                    indicesTris2[indicesTris2.length + 6] = pointMap.get(
+                        indicesTris[index + 2])
+                    indicesTris2[indicesTris2.length + 7] = c
+                    indicesTris2[indicesTris2.length + 8] = b
+
+                    indicesTris2[indicesTris2.length + 9] = a
+                    indicesTris2[indicesTris2.length + 10] = b
+                    indicesTris2[indicesTris2.length + 11] = c
                 }
             });
 
+            this.indicesTris = indicesTris2
         }
     }
 
