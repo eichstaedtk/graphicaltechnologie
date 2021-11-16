@@ -19,7 +19,7 @@ var ballMesh = ( function() {
         // Index data.
         this.indicesLines = new Uint16Array(recursionLevel * 2 * 16 * 3);
         var indicesLines = this.indicesLines;
-        this.indicesTris = new Uint16Array(recursionLevel * 12 * 3 * 20);
+        this.indicesTris = new Uint16Array(recursionLevel * 12 * 3 * 5);
         var indicesTris = this.indicesTris;
 
 
