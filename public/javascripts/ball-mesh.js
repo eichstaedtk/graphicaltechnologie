@@ -3,23 +3,24 @@ var ballMesh = ( function() {
     function createVertexData() {
 
         console.log('Create Data for Ball with Mesh')
+        console.log(document.getElementById('recursioninput').value)
 
         var verticesIndex = 0;
         var normalIndex = 0;
         var trisIndex = 0;
         var linesIndex = 0;
-        var recursionLevel = 1;
+        var recursionLevel =0;
         var pointMap = new Map();
 
-        this.vertices = new Float32Array(recursionLevel * 20 * 3 * 12);
+        this.vertices = new Float32Array(12 * 3 + recursionLevel * 20 * 60);
         var vertices = this.vertices;
         // Normals.
-        this.normals = new Float32Array(recursionLevel * 20 * 3 *12);
+        this.normals = new Float32Array( 12 * 3 + recursionLevel * 20 * 60);
         var normals = this.normals;
         // Index data.
-        this.indicesLines = new Uint16Array(recursionLevel * 2 * 16 * 3);
+        this.indicesLines = new Uint16Array( 2 * 3 * 16);
         var indicesLines = this.indicesLines;
-        this.indicesTris = new Uint16Array(recursionLevel * 12 * 3 * 5);
+        this.indicesTris = new Uint16Array(60);
         var indicesTris = this.indicesTris;
 
 
@@ -27,7 +28,7 @@ var ballMesh = ( function() {
             vertices[verticesIndex++] = x*0.2;
             vertices[verticesIndex++] = y*0.2;
             vertices[verticesIndex++] = z*0.2;
-            pointMap.set(pointNumber,[x*0.2,y*0.2,z*0.2])
+            pointMap.set(pointNumber,[x,y,z])
         }
 
         function addNormal(x,y,z) {
@@ -54,8 +55,6 @@ var ballMesh = ( function() {
 
             addVertex(((p1[0]+p2[0])/2),((p1[1]+p2[1])/2),((p1[2]+p2[2])/2),pointNumber)
             addNormal(((p1[0]+p2[0])/2),((p1[1]+p2[1])/2),((p1[2]+p2[2])/2))
-
-            console.log('Get Middle Point '+pointNumber)
 
             return pointNumber;
         }
@@ -187,46 +186,81 @@ var ballMesh = ( function() {
         addTrisIndices(8, 6, 7);
         addTrisIndices(9, 8, 1);
 
+        var indexTris2 = 0;
+        var indexLine2 = 0;
+
+        console.log('Building mesh before recursion')
+        console.log(indicesTris)
+
         for (var i = 0; i < recursionLevel; i++)
         {
-
-            console.log('Building mesh with recursion '+i)
-            var indicesTris2 = this.indicesTris;
+            var indicesTris2 = new Uint16Array( 3 * 4 * this.indicesTris.length / 3) ;
+            var indicesLine2 = new Uint16Array( 6 * 4 * this.indicesLines.length / 3) ;
 
             indicesTris.forEach(function (element, index) {
 
-                if(index % 3 === 0 && indicesTris[index+2]) {
-
+                if(index % 3 == 0) {
                     var a = getMiddlePoint(pointMap.get(indicesTris[index]),
                         pointMap.get(indicesTris[index + 1]));
-                    var b = getMiddlePoint(pointMap.get(indicesTris[index + 1]),
+                    var b = getMiddlePoint(pointMap.get(indicesTris[index+1]),
                         pointMap.get(indicesTris[index + 2]));
                     var c = getMiddlePoint(pointMap.get(indicesTris[index + 2]),
                         pointMap.get(indicesTris[index]));
 
-                    indicesTris2[indicesTris2.length] = pointMap.get(
-                        indicesTris[index])
-                    indicesTris2[indicesTris2.length + 1] = a
-                    indicesTris2[indicesTris2.length + 2] = c
+                    indicesTris2[indexTris2++] = indicesTris[index]
+                    indicesTris2[indexTris2++] = a
+                    indicesTris2[indexTris2++] = c
 
-                    indicesTris2[indicesTris2.length + 3] = pointMap.get(
-                        indicesTris[index + 1])
-                    indicesTris2[indicesTris2.length + 4] = b
-                    indicesTris2[indicesTris2.length + 5] = a
+                    indicesLine2[indexLine2++] = indicesTris[index]
+                    indicesLine2[indexLine2++] = a
+                    indicesLine2[indexLine2++] = a
+                    indicesLine2[indexLine2++] = c
+                    indicesLine2[indexLine2++] = c
+                    indicesLine2[indexLine2++] = indicesTris[index]
 
-                    indicesTris2[indicesTris2.length + 6] = pointMap.get(
-                        indicesTris[index + 2])
-                    indicesTris2[indicesTris2.length + 7] = c
-                    indicesTris2[indicesTris2.length + 8] = b
+                    indicesTris2[indexTris2++-1] = indicesTris[index + 1]
+                    indicesTris2[indexTris2++-1] = b
+                    indicesTris2[indexTris2++-1] = a
 
-                    indicesTris2[indicesTris2.length + 9] = a
-                    indicesTris2[indicesTris2.length + 10] = b
-                    indicesTris2[indicesTris2.length + 11] = c
+                    indicesLine2[indexLine2++] = indicesTris[index+1]
+                    indicesLine2[indexLine2++] = b
+                    indicesLine2[indexLine2++] = b
+                    indicesLine2[indexLine2++] = a
+                    indicesLine2[indexLine2++] = a
+                    indicesLine2[indexLine2++] = indicesTris[index+1]
+
+                    indicesTris2[indexTris2++] = indicesTris[index + 2]
+                    indicesTris2[indexTris2++] = c
+                    indicesTris2[indexTris2++] = b
+
+                    indicesLine2[indexLine2++] = indicesTris[index+2]
+                    indicesLine2[indexLine2++] = c
+                    indicesLine2[indexLine2++] = c
+                    indicesLine2[indexLine2++] = b
+                    indicesLine2[indexLine2++] = b
+                    indicesLine2[indexLine2++] = indicesTris[index+2]
+
+                    indicesTris2[indexTris2++] = a
+                    indicesTris2[indexTris2++] = b
+                    indicesTris2[indexTris2++] = c
+
+                    indicesLine2[indexLine2++] = a
+                    indicesLine2[indexLine2++] = b
+                    indicesLine2[indexLine2++] = b
+                    indicesLine2[indexLine2++] = c
+                    indicesLine2[indexLine2++] = c
+                    indicesLine2[indexLine2++] = a
                 }
+
             });
 
             this.indicesTris = indicesTris2
+            this.indicesLines = indicesLine2
         }
+
+        console.log('Building mesh after recursion')
+        console.log(indicesTris)
+        console.log(indicesLines)
     }
 
     return {
