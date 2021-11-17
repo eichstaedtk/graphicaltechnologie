@@ -9,7 +9,7 @@ var ballMesh = ( function() {
         var normalIndex = 0;
         var trisIndex = 0;
         var linesIndex = 0;
-        var recursionLevel =0;
+        var recursionLevel =1;
         var pointMap = new Map();
 
         this.vertices = new Float32Array(12 * 3 + recursionLevel * 20 * 60);
