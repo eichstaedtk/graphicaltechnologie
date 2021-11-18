@@ -288,7 +288,7 @@ var kegel = ( function() {
 
                 var x = r * Math.cos(t);
                 var z = r * Math.sin(t);
-                var y = -r - 0.4;
+                var y = -r - 0.5;
 
                 // Set vertex positions.
                 vertices[iVertex * 3] = x;
