@@ -1,7 +1,9 @@
 var ballMesh = ( function() {
 
     function createVertexData() {
-        var recursionLevel = 1  //parseInt(document.getElementById('textCanvas').innerHTML[0]);
+        var input = document.getElementById('recursioninput')
+        var recursionLevel = parseInt(input.value);
+        console.log('Rekursion Value '+recursionLevel)
 
         var vertices = [];
         var normals = [];

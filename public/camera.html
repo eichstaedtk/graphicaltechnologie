@@ -18,6 +18,7 @@
             uniform mat4 uMVMatrix;
 
             varying vec4 vColor;
+            attribute vec4 col;
 
             void main(){
                 gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
@@ -40,13 +41,23 @@
 <body onload="app.start()">
 <section>
   <h1>EA 6 - Kamerabewegung  Konrad Eichstädt THB</h1>
+  <section style="width: 50%; float: left">
+    Steuerung Tastatur
+    <p><b>O:</b> Ortogonale Ansicht</p>
+    <p><b>F:</b> Frustum Ansicht</p>
+    <p><b>P:</b> Perspektiv Ansicht</p>
+    <p><b>L:</b> Linien an / aus</p>
+  </section>
   <section>
-    <p>Zylinder</p>
-    <p>http://www.3d-meier.de/tut3/Seite103.html</p>
+    <p>Kamera</p>
+    <p><b>W:</b> Bewegung nach Oben</p>
+    <p><b>S:</b> Bewegung nach Unten</p>
+    <p><b>A:</b> Bewegung nach Links</p>
+    <p><b>D:</b> Bewegung nach Rechts</p>
   </section>
   <section>
     <label>Rekursion</label>
-    <input id="recursioninput" type="number" value="0">
+    <input id="recursioninput" type="number" value="0" onchange="app.start();">
   </section>
   <canvas id="c" width="800" height="800"></canvas>
 </section>

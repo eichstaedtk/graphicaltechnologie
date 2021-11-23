@@ -3,6 +3,7 @@ var app = (function(){
   var gl;
   var prog;
   var models = [];
+  var toggleWireframeOn = true;
 
   //Global Camera Object
   var camera = {
@@ -39,6 +40,7 @@ var app = (function(){
 
   function init() {
     console.log('Initialize the Engine ....')
+    models = []
     initWebGL();
     initShaderProgram();
     initUniforms()
@@ -112,19 +114,21 @@ var app = (function(){
   function initModels() {
     // fill-style
     var fs = "fillwireframe";
-    createModel("ballMesh", fs);
-    createModel("ball", fs);
-    createModel("kegel", fs);
-    createModel("grid", "wireframe");
+    createModel("ballMesh", fs,[0, 0, 0, 1]);
+    createModel("ball", fs,[0, 0, 0, 1]);
+    createModel("kegel", fs,[0, 0, 0, 1]);
+    createModel("grid", "wireframe",[0, 0, 0, 1]);
+
   }
 
-  function createModel(geometryname, fillstyle) {
+  function createModel(geometryname, fillstyle,color) {
     console.log('Create Model for '+geometryname)
     var model = {};
     model.fillstyle = fillstyle;
     initDataAndBuffers(model, geometryname);
     // Create and initialize Model-View-Matrix.
     model.mvMatrix = mat4.create();
+    model.color = color
 
     models.push(model);
   }
@@ -222,9 +226,10 @@ var app = (function(){
         case('B'):
           camera.lrtb += sign * 0.1; //Keystroke B and Shift+B changes the left right top bottom
           break;
+        case('L'):
+          toggleWireframeOn = !toggleWireframeOn;
+          break;
       }
-
-      // Render the scene again on any key pressed.
       render();
     };
   }
@@ -282,6 +287,15 @@ var app = (function(){
     console.log('Draw Model')
     console.log(model)
 
+    // Setup color vertex buffer object.
+    var vboCol = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
+    gl.bufferData(gl.ARRAY_BUFFER, model.color, gl.STATIC_DRAW);
+    // Bind vertex buffer to attribute variable.
+    var colAttrib = gl.getAttribLocation(prog, 'col');
+    gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(colAttrib);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
     gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,0,0);
 
@@ -300,7 +314,7 @@ var app = (function(){
 
     // Setup rendering lines.
     var wireframe = (model.fillstyle.search(/wireframe/) != -1);
-    if(wireframe) {
+    if(wireframe && toggleWireframeOn) {
       gl.disableVertexAttribArray(prog.normalAttrib);
       gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
@@ -311,7 +325,8 @@ var app = (function(){
 
   // App interface.
   return {
-    start : start
+    start : start,
+    render: render
   }
 
 }());
