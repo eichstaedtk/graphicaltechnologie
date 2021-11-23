@@ -127,12 +127,12 @@ var app = (function(){
         [.2, .2, .2]);
     createModel("sphere", fs, [ 1, 0, 1, 1 ],[-1, -.3, -1], [0, 0, 0],
         [.2, .2, .2]);
-    createModel("sphere", fs, [ 1, 1, 0, 1 ],[1, -.3, 1], [0, 0, 0],
-        [.3, .3, .3]);
+    createModel("sphere", fs, [ 1, 1, 0, 1 ],[0, 0, 0], [1, 0, 0],
+        [.15, .15, .15]);
     createModel("sphere", fs, [ 0, 1, 0, 1 ],[-1.2, -.3, 1], [0, 0, 0],
         [.3, .3, .3]);
 
-    [torusM,planeM,sphere1,sphere2,sphere3,sphere3] = models
+    [torusM,planeM,sphere1,sphere2,sphere3,sphere4] = models
 
 
     sphereAngle = (sphereAngle + deltaRotate) % (2 * Math.PI);
@@ -148,6 +148,8 @@ var app = (function(){
     sphere2.translate[0] = 1.3 * (cosOffset  -1);
     sphere2.translate[2] = -1.4 *(sinOffset -1);
 
+    sphere3.translate[0] = (-cosOffset)+1.5;
+    sphere3.translate[2] = sinOffset;
   }
 
   function createModel(geometryname, fillstyle,color, translate, rotate, scale) {
@@ -281,8 +283,11 @@ var app = (function(){
           const sinOffset = Math.sin(sphereAngle);
           sphere1.translate[0] = 2 * cosOffset -2 ;
 
-          sphere2.translate[0] = 1.3*(cosOffset  -1);
+          sphere2.translate[0] = 1.3*(cosOffset -1);
           sphere2.translate[2] = -1.4*(sinOffset -1);
+
+          sphere3.translate[0] = (-cosOffset)+1.5;
+          sphere3.translate[2] = sinOffset;
           break;
       }
       render();
