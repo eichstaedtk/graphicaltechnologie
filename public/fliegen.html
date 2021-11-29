@@ -46,12 +46,14 @@
 <body onload="app.start()">
 <section>
   <h1>EA 6 - Kamerabewegung  Konrad Eichstädt THB</h1>
+  <div style="height: 200px">
   <section style="width: 50%; float: left">
     Steuerung Tastatur
     <p><b>O:</b> Ortogonale Ansicht</p>
     <p><b>F:</b> Frustum Ansicht</p>
     <p><b>P:</b> Perspektiv Ansicht</p>
     <p><b>L:</b> Linien an / aus</p>
+    <p><b>K:</b> Objekte einzeln bewegen bzw. gedrückt halten für Animation</p>
   </section>
   <section>
     <p>Kamera</p>
@@ -60,10 +62,7 @@
     <p><b>A:</b> Bewegung nach Links</p>
     <p><b>D:</b> Bewegung nach Rechts</p>
   </section>
-  <section>
-    <label>Rekursion</label>
-    <input id="recursioninput" type="number" value="0" onchange="app.start();">
-  </section>
+  </div>
   <canvas id="c" width="800" height="800"></canvas>
 </section>
 </body>

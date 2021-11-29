@@ -129,7 +129,7 @@ var app = (function(){
         [.2, .2, .2]);
     createModel("sphere", fs, [ 1, 1, 0, 1 ],[0, 0, 0], [1, 0, 0],
         [.15, .15, .15]);
-    createModel("sphere", fs, [ 0, 1, 0, 1 ],[-1.2, -.3, 1], [0, 0, 0],
+    createModel("sphere", fs, [ 0, 1, 0, 1 ],[0.2, 3.5, 1], [0, 0, 0],
         [.3, .3, .3]);
 
     [torusM,planeM,sphere1,sphere2,sphere3,sphere4] = models
@@ -150,6 +150,9 @@ var app = (function(){
 
     sphere3.translate[0] = (-cosOffset)+1.5;
     sphere3.translate[2] = sinOffset;
+
+    sphere4.translate[1] = sinOffset+0.7;
+    sphere4.translate[2] = 1.5 * (cosOffset)-2.5;
   }
 
   function createModel(geometryname, fillstyle,color, translate, rotate, scale) {
@@ -222,6 +225,29 @@ var app = (function(){
     var deltaRotate = Math.PI / 36;
     var deltaTranslate = 0.05;
 
+    function animate(sign) {
+      //torusM.rotate[0] += sign * deltaRotate;
+      torusM.rotate[1] += sign * deltaRotate;
+      //torusM.rotate[2] += sign * deltaRotate;
+      sphere1.translate
+
+      sphereAngle = (sphereAngle + deltaRotate) % (2 * Math.PI);
+
+      const cosOffset = 1 + (Math.cos(sphereAngle));
+      const sinOffset = Math.sin(sphereAngle);
+
+      sphere1.translate[0] = 2 * cosOffset - 2;
+
+      sphere2.translate[0] = 1.3 * (cosOffset - 1);
+      sphere2.translate[2] = -1.4 * (sinOffset - 1);
+
+      sphere3.translate[0] = (-cosOffset) + 1.5;
+      sphere3.translate[2] = sinOffset;
+
+      sphere4.translate[1] = sinOffset + 0.7;
+      sphere4.translate[2] = 1.5 * (cosOffset) - 2.5;
+    }
+
     window.onkeydown = function(evt) {
       // Use shift key to change sign.
       var sign = evt.shiftKey ? -1 : 1;
@@ -274,20 +300,7 @@ var app = (function(){
           toggleWireframeOn = !toggleWireframeOn;
           break;
         case('K'):
-          //torusM.rotate[0] += sign * deltaRotate;
-          torusM.rotate[1] += sign * deltaRotate;
-          //torusM.rotate[2] += sign * deltaRotate;
-          sphere1.translate
-          sphereAngle = (sphereAngle + deltaRotate) % (2 * Math.PI);
-          const cosOffset = 1 + (Math.cos(sphereAngle));
-          const sinOffset = Math.sin(sphereAngle);
-          sphere1.translate[0] = 2 * cosOffset -2 ;
-
-          sphere2.translate[0] = 1.3*(cosOffset -1);
-          sphere2.translate[2] = -1.4*(sinOffset -1);
-
-          sphere3.translate[0] = (-cosOffset)+1.5;
-          sphere3.translate[2] = sinOffset;
+          animate(sign);
           break;
       }
       render();
