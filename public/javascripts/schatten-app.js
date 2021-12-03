@@ -1,5 +1,6 @@
 var app = (function(){
   //WebGL Context Variable
+  //view-source:https://menersar.github.io/ea7-z-bufferVisualisierung-main/
   var gl;
   var prog;
   var models = [];
@@ -124,9 +125,16 @@ var app = (function(){
 
 
     createModel("torus", fs, [1, 1, 1, 1 ],[.75, 0.6, 1], [0, 0, 0], [1, 1, 1]);
+    createModel("torus", fs, [1, 1, 1, 1 ],[.75, 0.5, 1.2], [0, 0, 0], [0.95, 0.95, 0.95 ]);
 
 
     createModel("sphere", fs, [ 1, 1, 1, 1 ],[-0.5, 0.2, 2], [0, 0, 0],
+        [.2, .2, .2]);
+
+    createModel("sphere", fs, [ 1, 1, 1, 1 ],[-0.7, 0.2, 2], [0, 0, 0],
+        [.2, .2, .2]);
+
+    createModel("sphere", fs, [ 1, 1, 1, 1 ],[-0.7, 0.1 , 2.2], [0, 0, 0],
         [.2, .2, .2]);
 
     createModel("sphere", fs, [ 1, 1, 1, 1 ],[-0.5, 0.2, -1.8], [0, 0, 0],
