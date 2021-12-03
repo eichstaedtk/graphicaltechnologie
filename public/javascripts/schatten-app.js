@@ -1,6 +1,5 @@
 var app = (function(){
   //WebGL Context Variable
-  //view-source:https://menersar.github.io/ea7-z-bufferVisualisierung-main/
   var gl;
   var prog;
   var models = [];
@@ -27,7 +26,7 @@ var app = (function(){
     // Projection matrix.
     pMatrix : mat4.create(),
     // Projection types: ortho, perspective, frustum.
-    projectionType : "ortho",
+    projectionType : "perspective",
     // Angle to Z-Axis for camera when orbiting the center
     // given in radian.
     zAngle : 0,
@@ -121,14 +120,17 @@ var app = (function(){
 
   function initModels() {
     var fs = "fillwireframe";
-    createModel("plane", "wireframe", [ 1, 1, 1, 1 ], [0, 0, 0], [0, 0, 0], [1, 1, 1]);
+    createModel("plane", fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0], [1, 1, 1]);
 
 
-    createModel("torus", fs, [1, 1, 1, 1 ],[.75, -.2, 2], [0, 0, 0], [1, 1, 1]);
+    createModel("torus", fs, [1, 1, 1, 1 ],[.75, 0.6, 1], [0, 0, 0], [1, 1, 1]);
 
 
-    createModel("sphere", fs, [ 1, 1, 1, 1 ],[-1, 0.2, 0], [0, 0, 0],
+    createModel("sphere", fs, [ 1, 1, 1, 1 ],[-0.5, 0.2, 2], [0, 0, 0],
         [.2, .2, .2]);
+
+    createModel("sphere", fs, [ 1, 1, 1, 1 ],[-0.5, 0.2, -1.8], [0, 0, 0],
+        [0.6, 0.6, 0.6]);
     /*
     createModel("sphere", fs, [ 1, 0, 1, 1 ],[-1, -.3, -1], [0, 0, 0],
         [.2, .2, .2]);
