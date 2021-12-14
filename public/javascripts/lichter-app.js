@@ -183,21 +183,19 @@ var app = (function(){
     createModel("plane", fs, cDarkBrown, [0, 0, 0], [0, 0, 0], [1, 1, 1], mGreen);
 
 
-    createModel("torus", fs, cOcreBrown,[.75, 0.6, 1], [0, 0, 0], [1, 1, 1], mDarkBrown);
-    createModel("torus", fs, cPineGreen,[.75, 0.5, 1.2], [0, 0, 0], [0.95, 0.95, 0.95 ],mDarkBrown);
+    createModel("torus", fs, cOcreBrown,[.75, 1.1, 1], [0, 0, 0], [1, 1, 1], mRed);
+    createModel("torus", fs, cPineGreen,[.75, 1, 1.2], [0, 0, 0], [0.95, 0.95, 0.95 ],mBlue);
 
 
     createModel("sphere", fs, cPineGreen,[-0.5, 0.2, 2], [0, 0, 0],
-        [.2, .2, .2],mBlue);
-
+        [.2, .2, .2],mRed);
     createModel("sphere", fs, cDarkGray,[-0.7, 0.2, 2], [0, 0, 0],
         [.2, .2, .2],mBlue);
-
-    createModel("sphere", fs, cDarkRed,[-0.7, 0.1 , 2.2], [0, 0, 0],
+    createModel("sphere", fs, cDarkRed,[-0.7, 0 , 2.2], [0, 0, 0],
         [.2, .2, .2],mGreen);
 
-    createModel("sphere", fs, cDarkOrange,[-0.5, 0.2, -1.8], [0, 0, 0],
-        [0.6, 0.6, 0.6],mGreen);
+    createModel("sphere", fs, cDarkOrange,[-0.5, 0, -2.3], [0, 0, 0],
+        [0.6, 0.6, 0.6],mWhite);
     /*
     createModel("sphere", fs, [ 1, 0, 1, 1 ],[-1, -.3, -1], [0, 0, 0],
         [.2, .2, .2]);
@@ -207,7 +205,7 @@ var app = (function(){
         [.3, .3, .3]);
         */
 
-    [plane, torusM] = models
+    interactiveModel = models[0];
 
 
   }
@@ -217,6 +215,7 @@ var app = (function(){
     model.fillstyle = fillstyle;
     model.color = color;
     model.material = material;
+
     initDataAndBuffers(model, geometryname);
     initTransformations(model, translate, rotate, scale);
 
@@ -280,8 +279,7 @@ var app = (function(){
   }
 
   function initEventHandler() {
-    var deltaRotate = Math.PI / 36;
-    var deltaTranslate = 0.05;
+    var deltaScale = 0.05;
 
     function animate(sign) {
       //torusM.rotate[0] += sign * deltaRotate;
@@ -374,8 +372,6 @@ var app = (function(){
     illumination.light[0].position[0] = Math.cos(currentLightRotation) * radiusLights;
     illumination.light[0].position[2] = Math.sin(currentLightRotation) * radiusLights;
 
-    //	illumination.light[1].position[0] = Math.cos(Math.PI + currentLightRotation) * radiusLights;
-    //	illumination.light[1].position[2] = Math.sin(Math.PI + currentLightRotation) * radiusLights;
   }
 
   function calculateCameraOrbit() {
@@ -447,15 +443,19 @@ var app = (function(){
       // Update modelview for model.
       updateTransformations(models[i]);
 
-      gl.uniform4fv(prog.colorUniform, models[i].color);
-
-      gl.uniformMatrix3fv(prog.nMatrixUniform, false,
-          models[i].nMatrix);
-
       // Set uniforms for model.
       gl.uniformMatrix4fv(prog.mvMatrixUniform, false,
           models[i].mvMatrix);
 
+      // Uniform-Variable uColor wird über die Referenz prog.colorUniform mit dem Farbwert aus dem jeweiligen Modell belegt
+      gl.uniform4fv(prog.colorUniform, models[i].color);
+
+      // innerhalb des Loops wird über die Modelle die Normal-Matrix Uniform-Variable uNMatrix über die Referenz prog.nMatrixUniform gesetzt
+      gl.uniformMatrix3fv(prog.nMatrixUniform, false,
+          models[i].nMatrix);
+
+
+      // Material.
       gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
       gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
       gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
@@ -506,7 +506,7 @@ var app = (function(){
 
     // Setup rendering lines.
     var wireframe = (model.fillstyle.search(/wireframe/) != -1);
-    if(wireframe && toggleWireframeOn) {
+    if(wireframe) {
       gl.uniform4fv(prog.colorUniform, [0.,0.,0.,1.]);
       gl.disableVertexAttribArray(prog.normalAttrib);
       gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);

@@ -34,6 +34,9 @@ var plane = ( function() {
         var y = 0;
         var z = v;
 
+        var displacement = Math.cos(x) * Math.cos(z);
+        y = y + displacement;
+
         // Set vertex positions.
         vertices[iVertex * 3] = x;
         vertices[iVertex * 3 + 1] = y;
