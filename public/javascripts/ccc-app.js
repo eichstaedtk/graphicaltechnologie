@@ -6,20 +6,7 @@ var app = (function(){
   var simulationPaused = false;
   var simulationRunning = false;
 
-  var speed = 50;
-
-  var sound = true;
-
-  var kugelnCanBecomeImmune;
-
-  var myChart;
-
-
-
-  // fillstyle
-  var wireFrameFill = "wireframefill";
   var wireframe = "wireframe";
-  var fill = "fill";
 
 
   var cSnow = [1., .98, 0.98, 1];
@@ -36,8 +23,6 @@ var app = (function(){
   var mSnow = createPhongMaterial({ kd: [1., .98, 0.98] });
 
 
-  var rekursionsSchritt = 0;
-
   var gl;
 
   // The shader program object is also used to
@@ -51,23 +36,6 @@ var app = (function(){
 
   let simulationInterval;
 
-  var kugelRadius = .1;
-
-  var sliderAnzahlKugelnN;
-  var sliderAnzahlKrankeK;
-  var sliderKugelRadiusR;
-  var sliderGesundungsZeitschritteZ;
-
-  var sliderSimulationsGeschwindigkeit;
-
-  var valueAnzahlKugelnN;
-  var valueAnzahlKrankeK;
-  var valueAnzahlGesundeG;
-  var valueKugelRadiusR;
-  var valueGesundungsZeitschritteZ;
-
-  var valueSimulationsGeschwindigkeit;
-
   var toggleWireframeOn = true;
 
   var deltaRotate = Math.PI / 36;
@@ -76,6 +44,7 @@ var app = (function(){
   var currentLightRotation = 0;
 
   var radiusLights = 5;
+
 
   //Global Camera Object
   var camera = {
@@ -115,6 +84,86 @@ var app = (function(){
     console.log('Starting the Engine ... ')
     init();
     render();
+  }
+
+  function startSimulation() {
+
+    var speed = 0;
+    var kugelRadius = parseInt(document.getElementById('kugelRadius').value);
+    var anzahlGesundeKugeln = parseInt(document.getElementById('anzahlGesundeKugeln').value);
+    var anzahlKrankeKugeln = parseInt(document.getElementById('anzahlKrankeKugeln').value);
+    var gesundung = document.getElementById('gesundung').value;
+    var geschwindigkeit = document.getElementById('geschwindigkeit').value;
+    speed = 50 / geschwindigkeit
+
+    const total = parseInt(anzahlGesundeKugeln)+parseInt(anzahlKrankeKugeln)
+    document.getElementById('statGesamtText').innerHTML = 'Gesamt '+ total
+    document.getElementById('statGesundText').innerHTML = 'Gesund '+ (anzahlGesundeKugeln)
+    document.getElementById('statKrankText').innerHTML = 'Krank '+ (anzahlKrankeKugeln)
+    document.getElementById('statImunText').innerHTML = 'Imun '
+
+    if (!simulationPaused) {
+      kugelModels = [];
+    }
+
+
+    if (!simulationPaused) {
+      const radius = kugelRadius * .02;
+      var kugelID = 0;
+      let kugelMinPunkt = -1 + radius;
+      let kugelMaxPunkt = 1 - radius;
+
+      for (var j = 0; j < anzahlGesundeKugeln; j++) {
+        var kugel = new Kugel(kugelID, radius, false, kugelMinPunkt, kugelMaxPunkt, gesundung, kugelModels, true);
+
+        kugelModels.push(kugel);
+        kugelID++;
+      }
+
+      for (var j = 0; j < anzahlKrankeKugeln; j++) {
+        var kugel = new Kugel(kugelID, radius, true, kugelMinPunkt, kugelMaxPunkt, gesundung, kugelModels, true);
+
+        kugelModels.push(kugel);
+        kugelID++;
+      }
+
+    }
+
+    simulationInterval = setInterval(() => {
+      if (!simulationRunning || simulationPaused) {
+        return;
+      }
+
+      models = [];
+      initModels();
+
+      document.getElementById('statGesamt').width.baseVal.value = kugelModels.length * 10
+      document.getElementById('statGesund').width.baseVal.value = kugelModels.filter((kugel)=> kugel.immun == false && kugel.gesund == true).length * 10
+      document.getElementById('statKrank').width.baseVal.value = kugelModels.filter((kugel)=> kugel.immun == false && kugel.gesund == false).length * 10
+      document.getElementById('statImun').width.baseVal.value = kugelModels.filter((kugel)=> kugel.immun == true).length * 10
+      document.getElementById('statGesamtText').innerHTML = 'Gesamt '+ kugelModels.length
+      document.getElementById('statGesundText').innerHTML = 'Gesund '+ (kugelModels.filter((kugel)=> kugel.immun == false && kugel.gesund == true).length)
+      document.getElementById('statKrankText').innerHTML = 'Krank '+ (kugelModels.filter((kugel)=> kugel.immun == false && kugel.gesund == false).length)
+      document.getElementById('statImunText').innerHTML = 'Imun '+ (kugelModels.filter((kugel)=> kugel.immun == true).length)
+
+      render();
+
+      kugelModels.forEach((kugel) => {
+
+        kugel.moveKugel();
+        kugel.testInfection(kugelModels);
+
+      });
+    }, speed);
+
+  }
+
+
+
+  function pauseSimulation() {
+    clearInterval(simulationInterval);
+
+    simulationPaused = true;
   }
 
   function init() {
@@ -245,6 +294,25 @@ var app = (function(){
     createModel("plane", wireframe, cSnow, [0, 0, -1], [0, Math.PI * .5, Math.PI * .5], [1, 1, 1], mSnow);
 
 
+    if(true){
+      kugelModels.forEach(k => {
+        if (!k.immun) {
+          if (k.gesund == false) {
+            createModel("sphere", "fill", cKugelRed, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mRed);
+          } else if (k.gesund) {
+            createModel("sphere", "fill", cKugelGreen, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mGreen);
+          }
+        } else {
+          if (k.gesund == false) {
+            createModel("sphere", "fill", cKugelYellow, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mYellow);
+          } else if (k.gesund) {
+            createModel("sphere", "fill", cKugelBlue, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mBlue);
+          }
+
+        }
+      });
+    }
+
   }
 
   function createModel(geometryname, fillstyle,color, translate, rotate, scale,material) {
@@ -281,7 +349,6 @@ var app = (function(){
     // vertices, normals, indicesLines, indicesTris;
     // Pointer this refers to the window.
     this[geometryname]['createVertexData'].apply(model);
-    console.log(model)
     // Setup position vertex buffer object.
     model.vboPos = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
@@ -552,7 +619,39 @@ var app = (function(){
           gl.UNSIGNED_SHORT, 0);
 
     }
+
   }
+
+  document.getElementById('startSimulation').onclick = () => {
+
+    simulationRunning = !simulationRunning;
+
+    if (document.getElementById('startSimulation').text == 'Start Simulation') {
+
+      startSimulation();
+
+      simulationPaused = false;
+
+      document.getElementById('startSimulation').text = 'Pause Simulation';
+    } else {
+      simulationPaused = true;
+      pauseSimulation();
+      document.getElementById('startSimulation').text = 'Start Simulation';
+    }
+
+  };
+
+  document.getElementById("config").onpointerup = function () {
+
+    stop()
+
+    if (simulationRunning) {
+      startSimulation();
+    }
+
+    simulationPaused = false;
+  }
+
 
   // App interface.
   return {
