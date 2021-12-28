@@ -6,12 +6,11 @@ class Kugel {
     this.id = _id;
     this.radius = _radius;
     this.startPunkt;
-    this.createPosition(_minPosition, _maxPosition, _kugelModels);
-    this.richtung = [getRandomArbitrary(0.1, 1), getRandomArbitrary(0.1, 1), getRandomArbitrary(0.1, 1)];
-
+    this.calculatePosition(_minPosition, _maxPosition, _kugelModels);
+    this.richtung = [random(0.1, 1), random(0.1, 1), random(0.1, 1)];
     vec3.normalize(this.richtung, this.richtung);
 
-    this.geschwindigkeit = getRandomArbitrary(1, 10) * .001;
+    this.geschwindigkeit = random(1, 10) * .001;
     this.gesund = _gesund;
     this.vergangeneZeitschritte = 0;
     this.zeitZumGesundwerden = _zeitZumGesundwerden;
@@ -21,21 +20,20 @@ class Kugel {
   }
 
 
-  createPosition(_minPos, _maxPos, _kugelMod) {
-    this.startPunkt = [getRandomArbitrary(_minPos, _maxPos), getRandomArbitrary(_minPos, _maxPos), getRandomArbitrary(_minPos, _maxPos)];
+  calculatePosition(_minPos, _maxPos, _kugelMod) {
+    this.startPunkt = [random(_minPos, _maxPos), random(_minPos, _maxPos), random(_minPos, _maxPos)];
 
-    // damit die Startposition immer an anderen Orten wie die der anderen Kugeln ist
     if (_kugelMod.length > 0) {
       _kugelMod.forEach((k) => {
-        if (this.intersect(k.startPunkt)) {
-          this.createPosition(_minPos, _maxPos, _kugelMod);
+        if (this.collision(k.startPunkt)) {
+          this.calculatePosition(_minPos, _maxPos, _kugelMod);
         }
       });
     }
   }
 
 
-  moveKugel() {
+  move() {
 
     vec3.scaleAndAdd(this.startPunkt, this.startPunkt, this.richtung, this.geschwindigkeit);
 
@@ -82,13 +80,13 @@ class Kugel {
   testInfection(otherKugeln) {
 
     otherKugeln.forEach((k) => {
-      if (k.id != this.id && this.intersect(k.startPunkt)) {
+      if (k.id != this.id && this.collision(k.startPunkt)) {
 
         vec3.normalize(k.richtung, vec3.subtract(this.richtung, this.richtung, k.richtung));
         vec3.negate(this.richtung, k.richtung);
 
-        vec3.scaleAndAdd(this.startPunkt, this.startPunkt, this.richtung, this.radius * .1);
-        vec3.scaleAndAdd(k.startPunkt, k.startPunkt, k.richtung, k.radius * .1);
+        vec3.scaleAndAdd(this.startPunkt, this.startPunkt, this.richtung, this.radius * 0.1);
+        vec3.scaleAndAdd(k.startPunkt, k.startPunkt, k.richtung, k.radius * 0.1);
 
         if (this.gesund && !k.gesund) {
           this.gesund = false;
@@ -97,17 +95,13 @@ class Kugel {
     });
   }
 
-  intersect(otherKugelPosition) {
+  collision(otherKugelPosition) {
     let r = this.radius;
     let d = vec3.distance(otherKugelPosition, this.startPunkt);
     return d <= (r + r);
   }
 }
 
-function getRandomArbitrary(min, max) {
+function random(min, max) {
   return Math.random() * (max - min) + min;
-}
-
-function randomIntFromInterval(min, max) { // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min)
 }

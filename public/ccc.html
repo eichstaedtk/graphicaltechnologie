@@ -63,13 +63,32 @@
     }
 
     function start() {
+
+      var rangeSlider = function(){
+        var slider = $('.range-slider'),
+            range = $('.range-slider__range'),
+            value = $('.range-slider__value');
+
+        slider.each(function(){
+
+          value.each(function(){
+            var value = $(this).prev().attr('value');
+            $(this).html(value);
+          });
+
+          range.on('input', function(){
+            $(this).next(value).html(this.value);
+          });
+        });
+      };
+
+      rangeSlider();
+
         loadWegGL('./webgl/vertex-ccc.vs','./webgl/fragment-ccc.fs')
         app.start()
     }
 
   </script>
-
-
 </head>
 
 <body onload="start()">
@@ -83,7 +102,6 @@
     <p><b>P:</b> Perspektiv Ansicht</p>
     <p><b>E:</b> Bewegung weg</p>
     <p><b>Q:</b> Bewegung hin</p>
-    <p><b>I:</b> Licht Bewegung</p>
   </section>
   <section style="width: 50%;float: right">
     <p>Kamera</p>
@@ -94,29 +112,52 @@
   </section>
   <section id="config" style="width: 50%;float: right">
       <h3><strong>Konfiguration</strong></h3>
-      <a id="startSimulation" class="btn">Start Simulation</a>
-      <p>Anzahl gesunde Kugeln: <span></span></p>
-      <input style="width: 50%;" type="range" min="1" max="20" value="10" id="anzahlGesundeKugeln">
-      <p>Anzahl kranke Kugeln: <span></span></p>
-      <input style="width: 50%;" type="range" min="1" max="20" value="10" id="anzahlKrankeKugeln">
-      <p>Radius Kugeln: <span></span></p>
-      <input style="width: 50%;" type="range" min="1" max="10" value="5" id="kugelRadius">
-      <p>Gesundung: <span></span></p>
-      <input style="width: 50%;" type="range" min="1" max="500" value="500" id="gesundung">
-      <p>Geschwindigkeit: <span></span></p>
-      <input style="width: 50%;" type="range" min="1" max="100" value="25" id="geschwindigkeit">
+      <a id="startSimulation" class="btn">Start</a>
+
+      <div style="margin-top: 10px">
+        <label id="checkboxParent">
+          <input id="immunitaet" type="checkbox" />
+          <span id="checkboxText">Mit / Ohne Immunität</span>
+        </label>
+      </div>
+
+       <div class="range-slider">
+          <p>Anzahl gesunde Kugeln: </p>
+          <input style="width: 50%;" type="range" min="1" max="20" value="10" id="anzahlGesundeKugeln" class="range-slider__range">
+          <span class="range-slider__value">0</span>
+       </div>
+      <div class="range-slider">
+        <p>Anzahl kranke Kugeln: </p>
+        <input style="width: 50%;" type="range" min="1" max="20" value="10" id="anzahlKrankeKugeln" class="range-slider__range">
+        <span class="range-slider__value">0</span>
+      </div>
+      <div class="range-slider">
+        <p>Radius Kugeln:</p>
+        <input style="width: 50%;" type="range" min="1" max="10" value="7" id="kugelRadius" class="range-slider__range">
+        <span class="range-slider__value">0</span>
+      </div>
+      <div class="range-slider">
+        <p>Gesundung:</p>
+        <input style="width: 50%;" type="range" min="1" max="500" value="500" id="gesundung" class="range-slider__range">
+        <span class="range-slider__value">0</span>
+      </div>
+    <div class="range-slider">
+        <p>Geschwindigkeit:</p>
+      <input style="width: 50%;" type="range" min="1" max="100" value="25" id="geschwindigkeit" class="range-slider__range">
+    <span class="range-slider__value">0</span>
+    </div>
     </section>
     <section style="width: 50%;float: right">
-      <h3><strong>Krankenstand</strong></h3>
+      <h3><strong>Statistik</strong></h3>
       <svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
         <text id="statGesamtText" x="10" y="50" font-size="12"></text>
-        <rect id="statGesamt" x="100" y="35" width="0" height="20" rx="3" ry="3" fill="rgb(102, 0, 102)" />
+        <rect id="statGesamt" x="100" y="35" width="0" height="20" rx="3" ry="3" fill="rgb(0, 0, 0)" />
         <text id="statGesundText" x="10" y="80" font-size="12"></text>
         <rect id="statGesund" x="100" y="65" width="0" height="20" rx="3" ry="3" fill="rgb(78, 187, 87)" />
         <text id="statKrankText" x="10" y="110" font-size="12"></text>
-        <rect id="statKrank" x="100" y="95" width="0" height="20" rx="3" ry="3" fill="rgb(165, 46, 37)" />
+        <rect id="statKrank" x="100" y="95" width="0" height="20" rx="3" ry="3" fill="rgb(255, 12, 12)" />
         <text id="statImunText" x="10" y="140" font-size="12"></text>
-        <rect id="statImun" x="100" y="125" width="0" height="20" rx="3" ry="3" fill="rgb(0, 102, 255)" />
+        <rect id="statImun" x="100" y="125" width="0" height="20" rx="3" ry="3" fill="rgb(51, 178, 229)" />
       </svg>
     </section>
   </div>
@@ -125,5 +166,4 @@
   </div>
 </section>
 </body>
-
 </html>

@@ -1,26 +1,23 @@
 var app = (function(){
-  //WebGL Context Variable
-  //view-source:https://menersar.github.io/ea7-z-bufferVisualisierung-main/
-  var kugelModels = [];
 
+  var kugelModels = [];
   var simulationPaused = false;
   var simulationRunning = false;
-
   var wireframe = "wireframe";
-
-
-  var cSnow = [1., .98, 0.98, 1];
+  var white = [1., .98, 0.98, 1];
 
   var cKugelGreen = [0, .784, .318, 1];
   var cKugelRed = [1., .267, .267, 1];
   var cKugelBlue = [.2, .71, .898, 1];
   var cKugelYellow = [1, .733, .2, 1];
+  var cKugelBlack = [0,0, 0, 1];
 
   var mBlue = createPhongMaterial({ kd: [.2, .71, .898] });
   var mYellow = createPhongMaterial({ kd: [1, .733, .2] });
   var mGreen = createPhongMaterial({ kd: [0, .784, .318] });
   var mRed = createPhongMaterial({ kd: [1., .267, .267] });
   var mSnow = createPhongMaterial({ kd: [1., .98, 0.98] });
+  var mBlack = createPhongMaterial({ kd: [0, 0, 0] });
 
 
   var gl;
@@ -88,19 +85,21 @@ var app = (function(){
 
   function startSimulation() {
 
-    var speed = 0;
+    var immunitaet = document.getElementById('immunitaet').checked ? true : false;
     var kugelRadius = parseInt(document.getElementById('kugelRadius').value);
     var anzahlGesundeKugeln = parseInt(document.getElementById('anzahlGesundeKugeln').value);
     var anzahlKrankeKugeln = parseInt(document.getElementById('anzahlKrankeKugeln').value);
     var gesundung = document.getElementById('gesundung').value;
     var geschwindigkeit = document.getElementById('geschwindigkeit').value;
-    speed = 50 / geschwindigkeit
+    var speed = 400 / geschwindigkeit
 
     const total = parseInt(anzahlGesundeKugeln)+parseInt(anzahlKrankeKugeln)
     document.getElementById('statGesamtText').innerHTML = 'Gesamt '+ total
     document.getElementById('statGesundText').innerHTML = 'Gesund '+ (anzahlGesundeKugeln)
     document.getElementById('statKrankText').innerHTML = 'Krank '+ (anzahlKrankeKugeln)
     document.getElementById('statImunText').innerHTML = 'Imun '
+
+    console.log('Start Simulation ... with Speed '+speed)
 
     if (!simulationPaused) {
       kugelModels = [];
@@ -114,14 +113,14 @@ var app = (function(){
       let kugelMaxPunkt = 1 - radius;
 
       for (var j = 0; j < anzahlGesundeKugeln; j++) {
-        var kugel = new Kugel(kugelID, radius, false, kugelMinPunkt, kugelMaxPunkt, gesundung, kugelModels, true);
+        var kugel = new Kugel(kugelID, radius, true, kugelMinPunkt, kugelMaxPunkt, gesundung, kugelModels, immunitaet);
 
         kugelModels.push(kugel);
         kugelID++;
       }
 
       for (var j = 0; j < anzahlKrankeKugeln; j++) {
-        var kugel = new Kugel(kugelID, radius, true, kugelMinPunkt, kugelMaxPunkt, gesundung, kugelModels, true);
+        var kugel = new Kugel(kugelID, radius, false, kugelMinPunkt, kugelMaxPunkt, gesundung, kugelModels, immunitaet);
 
         kugelModels.push(kugel);
         kugelID++;
@@ -150,7 +149,7 @@ var app = (function(){
 
       kugelModels.forEach((kugel) => {
 
-        kugel.moveKugel();
+        kugel.move();
         kugel.testInfection(kugelModels);
 
       });
@@ -162,7 +161,6 @@ var app = (function(){
 
   function pauseSimulation() {
     clearInterval(simulationInterval);
-
     simulationPaused = true;
   }
 
@@ -279,40 +277,42 @@ var app = (function(){
   }
 
   function initModels() {
-    createModel("plane", wireframe, cSnow, [0, -1, 0], [0, 0, 0], [1, 1, 1], mSnow);
-    createModel("plane", wireframe, cSnow, [0, 1, 0], [0, 0, 0], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [0, -1, 0], [0, 0, 0], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [0, 1, 0], [0, 0, 0], [1, 1, 1], mSnow);
 
-    createModel("plane", wireframe, cSnow, [0, -1, 0], [0, Math.PI, 0], [1, 1, 1], mSnow);
-    createModel("plane", wireframe, cSnow, [0, 1, 0], [0, Math.PI, 0], [1, 1, 1], mSnow);
-
-
-    createModel("plane", wireframe, cSnow, [-1, 0, 0], [0, 0, Math.PI * .5], [1, 1, 1], mSnow);
-    createModel("plane", wireframe, cSnow, [1, 0, 0], [0, 0, Math.PI * .5], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [0, -1, 0], [0, Math.PI, 0], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [0, 1, 0], [0, Math.PI, 0], [1, 1, 1], mSnow);
 
 
-    createModel("plane", wireframe, cSnow, [0, 0, -1], [0, Math.PI * 1.5, Math.PI * .5], [1, 1, 1], mSnow);
-    createModel("plane", wireframe, cSnow, [0, 0, -1], [0, Math.PI * .5, Math.PI * .5], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [-1, 0, 0], [0, 0, Math.PI * .5], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [1, 0, 0], [0, 0, Math.PI * .5], [1, 1, 1], mSnow);
 
 
-    if(true){
+    createModel("plane", wireframe, white, [0, 0, -1], [0, Math.PI * 1.5, Math.PI * .5], [1, 1, 1], mSnow);
+    createModel("plane", wireframe, white, [0, 0, -1], [0, Math.PI * .5, Math.PI * .5], [1, 1, 1], mSnow);
+
       kugelModels.forEach(k => {
+
         if (!k.immun) {
-          if (k.gesund == false) {
-            createModel("sphere", "fill", cKugelRed, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mRed);
-          } else if (k.gesund) {
-            createModel("sphere", "fill", cKugelGreen, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mGreen);
-          }
-        } else {
-          if (k.gesund == false) {
-            createModel("sphere", "fill", cKugelYellow, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mYellow);
-          } else if (k.gesund) {
-            createModel("sphere", "fill", cKugelBlue, k.startPunkt, [0, 0, 0], [k.radius, k.radius, k.radius], mBlue);
+            if (k.gesund == false) {
+              createModel("sphere", "fill", cKugelRed, k.startPunkt, [0, 0, 0],
+                  [k.radius, k.radius, k.radius], mRed);
+            } else if (k.gesund) {
+              createModel("sphere", "fill", cKugelGreen, k.startPunkt,
+                  [0, 0, 0], [k.radius, k.radius, k.radius], mGreen);
+            }
+          } else {
+            if (k.gesund == false) {
+              createModel("sphere", "fill", cKugelYellow, k.startPunkt,
+                  [0, 0, 0], [k.radius, k.radius, k.radius], mYellow);
+            } else if (k.gesund) {
+              createModel("sphere", "fill", cKugelBlue, k.startPunkt, [0, 0, 0],
+                  [k.radius, k.radius, k.radius], mBlue);
+            }
+
           }
 
-        }
       });
-    }
-
   }
 
   function createModel(geometryname, fillstyle,color, translate, rotate, scale,material) {
@@ -343,7 +343,6 @@ var app = (function(){
   }
 
   function initDataAndBuffers(model, geometryname) {
-    console.log('Init Data Buffer '+geometryname)
     // Provide model object with vertex data arrays.
     // Fill data arrays for Vertex-Positions, Normals, Index data:
     // vertices, normals, indicesLines, indicesTris;
@@ -626,24 +625,24 @@ var app = (function(){
 
     simulationRunning = !simulationRunning;
 
-    if (document.getElementById('startSimulation').text == 'Start Simulation') {
+    if (document.getElementById('startSimulation').text == 'Start') {
 
       startSimulation();
 
       simulationPaused = false;
 
-      document.getElementById('startSimulation').text = 'Pause Simulation';
+      document.getElementById('startSimulation').text = 'Stop';
     } else {
       simulationPaused = true;
       pauseSimulation();
-      document.getElementById('startSimulation').text = 'Start Simulation';
+      document.getElementById('startSimulation').text = 'Start';
     }
 
   };
 
   document.getElementById("config").onpointerup = function () {
 
-    stop()
+    pauseSimulation()
 
     if (simulationRunning) {
       startSimulation();
