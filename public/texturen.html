@@ -1,0 +1,99 @@
+<html>
+
+<head>
+  <title>WEB GL on Canvas</title>
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="stylesheets/materialize.min.css" />
+
+  <script src="javascripts/jquery-3.6.0.min.js"></script>
+  <script src="javascripts/materialize.min.js"></script>
+  <script src="javascripts/gl-matrix.js"></script>
+  <script src="javascripts/apple.js"></script>
+  <script src="javascripts/texturen-app.js"></script>
+
+  <script type="application/javascript">
+
+    function loadWegGL(shadderURL,fragmentURL) {
+      console.log('Loading WebGL Scripts '+shadderURL+ ' '+fragmentURL)
+
+      var shadderScript = document.getElementById('vertexshader')
+      var fragmentScript = document.getElementById('fragmentshader')
+
+      var vs_source = null,
+          fs_source = null;
+      $.get({
+        async: false,
+        url: shadderURL ,
+        success: function (data) {
+          vs_source = data
+          console.log(vs_source)
+          if(!shadderScript) {
+            shadderScript = document.createElement('script');
+            shadderScript.setAttribute('type', 'x-shader/x-vertex')
+            shadderScript.setAttribute('id', 'vertexshader')
+            document.head.appendChild(shadderScript);
+          }
+
+          shadderScript.text = vs_source
+        },
+        dataType: 'text'
+      });
+
+      $.get({
+        async: false,
+        url: fragmentURL,
+        success: function (data) {
+          fs_source = data
+
+          if(!fragmentScript) {
+            fragmentScript = document.createElement('script');
+            fragmentScript.setAttribute('type', 'x-shader/x-fragment')
+            fragmentScript.setAttribute('id', 'fragmentshader')
+            document.head.appendChild(fragmentScript);
+          }
+
+          fragmentScript.text = fs_source
+        },
+        dataType: 'text'
+      });
+    }
+
+    function start(phong) {
+
+     loadWegGL('./webgl/vertex-lichter.vs','./webgl/fragment-lichter.fs')
+     var link = document.getElementById('exchangeWebGLLink')
+      app.start()
+    }
+
+  </script>
+
+
+</head>
+
+<body onload="start()">
+<section>
+  <h1>EA 9 - Torustextur Konrad Eichstädt THB</h1>
+  <div style="height: 180px">
+  <section style="width: 50%; float: left">
+    Steuerung Tastatur
+    <p><b>O:</b> Ortogonale Ansicht</p>
+    <p><b>F:</b> Frustum Ansicht</p>
+    <p><b>P:</b> Perspektiv Ansicht</p>
+    <p><b>E:</b> Bewegung weg</p>
+    <p><b>Q:</b> Bewegung hin</p>
+  </section>
+  <section style="width: 50%;float: right">
+    <p>Kamera</p>
+    <p><b>W:</b> Bewegung nach Oben</p>
+    <p><b>S:</b> Bewegung nach Unten</p>
+    <p><b>A:</b> Bewegung nach Links</p>
+    <p><b>D:</b> Bewegung nach Rechts</p>
+  </section>
+  </div>
+  <h5><a href="http://www.3d-meier.de/tut3/Seite54.html">Apfel Textur</a></h5>
+  <canvas id="c" width="800" height="800"></canvas>
+</section>
+</body>
+
+</html>
