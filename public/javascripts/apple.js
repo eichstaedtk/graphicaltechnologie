@@ -10,6 +10,10 @@ var apple = ( function() {
     // Normals.
     this.normals = new Float32Array(3 * (n + 1) * (m + 1));
     var normals = this.normals;
+
+    this.textureCoord = new Float32Array(2 * (n + 1) * (m + 1));
+    var textureCoord = this.textureCoord;
+
     // Index data.
     this.indicesLines = new Uint16Array(2 * 2 * n * m);
     var indicesLines = this.indicesLines;
@@ -37,6 +41,18 @@ var apple = ( function() {
         vertices[iVertex * 3] = x;
         vertices[iVertex * 3 + 1] = y;
         vertices[iVertex * 3 + 2] = z;
+
+        // Calc and set normals.
+        var nx = Math.cos(u) * Math.cos(v);
+        var ny = Math.cos(u) * Math.sin(v);
+        var nz = Math.sin(u);
+        normals[iVertex * 3] = nx;
+        normals[iVertex * 3 + 1] = ny;
+        normals[iVertex * 3 + 2] = nz;
+
+        // Set texture coordinate.
+        textureCoord[iVertex * 2] = (u+ Math.PI)/(2*Math.PI);
+        textureCoord[iVertex * 2 + 1] = (v+Math.PI)/(2*Math.PI);
 
         if(j > 0 && i > 0) {
           indicesLines[iLines++] = iVertex - 1;
