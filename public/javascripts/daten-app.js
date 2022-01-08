@@ -1,6 +1,4 @@
 var app = (function(){
-  //WebGL Context Variable
-  //view-source:https://menersar.github.io/ea7-z-bufferVisualisierung-main/
   var gl;
   var prog;
   var models = [];
@@ -47,6 +45,7 @@ var app = (function(){
 
   function start() {
     console.log('Starting the Engine ... ')
+    Data.init()
     init();
     render();
   }
@@ -165,27 +164,16 @@ var app = (function(){
   }
 
   function initModels() {
-    var fs = "fill";
-
-    var mDefault = createPhongMaterial();
-    var mRed = createPhongMaterial({kd:[1.,0.,0.]});
-    var mGreen = createPhongMaterial({kd:[0.,1.,0.]});
-    var mDarkBrown = createPhongMaterial({kd:[.36,.25,0.20]});
-    var mBlue = createPhongMaterial({kd:[0.,0.,1.]});
-    var mWhite = createPhongMaterial({ka:[1.,1.,1.], kd:[.5,.5,.5], ks:[0.,0.,0.]});
-
-    var cDarkBrown = [.36,.25,0.20, 1];
-    var cOcreBrown = [.53,.26,0.12, 1];
-    var cPineGreen = [.0,.2,0.0, 1];
-    var cDarkGray = [.32,.32,0.32, 1];
-    var cDarkRed = [.40,.0,0., 1];
-    var cDarkOrange = [.8,.4,0., 1];
-    var cWhite = [1,1,1, 1];
-
-    createModel("apple", fs, cPineGreen,[-0.5, 0.5, 0.5], [-1.5, -0.5, 0], [0.1, 0.1, 0.1], mGreen, 'images/wood.png');
-
+    var fs = "fillwireframe";
+    var mBlue = createPhongMaterial({kd: [0., 0., 1.]});
+    createModel("sphere", fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0],
+        [.5, .5, .5], mBlue);
     interactiveModel = models[0];
 
+  }
+
+    function initModelsFromData(data, stats) {
+    // .. todo
   }
 
   function createModel(geometryname, fillstyle,color, translate, rotate, scale,material, image) {
@@ -281,12 +269,14 @@ var app = (function(){
     gl.enableVertexAttribArray(prog.normalAttrib);
 
     // Setup texture coordinate vertex buffer object.
-    model.vboTextureCoord = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
-    gl.bufferData(gl.ARRAY_BUFFER, model.textureCoord, gl.STATIC_DRAW);
-    // Bind buffer to attribute variable.
-    prog.textureCoordAttrib = gl.getAttribLocation(prog, 'aTextureCoord');
-    gl.enableVertexAttribArray(prog.textureCoordAttrib);
+    if (model.texture) {
+      model.vboTextureCoord = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
+      gl.bufferData(gl.ARRAY_BUFFER, model.textureCoord, gl.STATIC_DRAW);
+      // Bind buffer to attribute variable.
+      prog.textureCoordAttrib = gl.getAttribLocation(prog, 'aTextureCoord');
+      gl.enableVertexAttribArray(prog.textureCoordAttrib);
+    }
 
     // Setup lines index buffer object.
     model.iboLines = gl.createBuffer();
@@ -309,26 +299,11 @@ var app = (function(){
     var deltaScale = 0.05;
 
     function animate(sign) {
-      //torusM.rotate[0] += sign * deltaRotate;
-      torusM.rotate[1] += sign * deltaRotate;
-      //torusM.rotate[2] += sign * deltaRotate;
-      sphere1.translate
 
       sphereAngle = (sphereAngle + deltaRotate) % (2 * Math.PI);
 
       const cosOffset = 1 + (Math.cos(sphereAngle));
       const sinOffset = Math.sin(sphereAngle);
-
-      sphere1.translate[0] = 2 * cosOffset - 2;
-
-      sphere2.translate[0] = 1.3 * (cosOffset - 1);
-      sphere2.translate[2] = -1.4 * (sinOffset - 1);
-
-      sphere3.translate[0] = (-cosOffset) + 1.5;
-      sphere3.translate[2] = sinOffset;
-
-      sphere4.translate[1] = sinOffset + 0.7;
-      sphere4.translate[2] = 1.5 * (cosOffset) - 2.5;
     }
 
     window.onkeydown = function(evt) {
@@ -449,6 +424,13 @@ var app = (function(){
     gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
     // Loop over models.
     for(var i = 0; i < models.length; i++) {
+
+      if (models[i].texture && !models[i].texture.loaded) {
+        // Leave out this model for now.
+        // When the texture is loaded the onload will request a scene update.
+        continue;
+      }
+
       // Update modelview for model.
       updateTransformations(models[i]);
 
@@ -470,7 +452,7 @@ var app = (function(){
       gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
       gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
 
-      if(models[i].texture.loaded)
+      if(models[i].texture)
       {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
@@ -503,23 +485,29 @@ var app = (function(){
 
   function draw(model) {
     // Setup position VBO.
-    gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
-    gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT, false,
-        0, 0);
+    if (model.texture) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
+      gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT, false,
+          0, 0);
+    }
 
     // Setup normal VBO.
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
     gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
 
     // Setup texture VBO.
-    gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
-    gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false, 0, 0);
+    if (model.texture) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
+      gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false, 0, 0);
+    }
 
     // Setup rendering tris.
     var fill = (model.fillstyle.search(/fill/) != -1);
     if(fill) {
       gl.enableVertexAttribArray(prog.normalAttrib);
-      gl.enableVertexAttribArray(prog.textureCoordAttrib);
+      if (model.texture) {
+        gl.enableVertexAttribArray(prog.textureCoordAttrib);
+      }
 
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
       gl.drawElements(gl.TRIANGLES, model.iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
@@ -530,13 +518,25 @@ var app = (function(){
     if(wireframe) {
       gl.uniform4fv(prog.colorUniform, [0.,0.,0.,1.]);
       gl.disableVertexAttribArray(prog.normalAttrib);
-      gl.disableVertexAttribArray(prog.textureCoordAttrib);
+      if (model.texture)
+      {
+        gl.disableVertexAttribArray(prog.textureCoordAttrib);
+      }
       gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
       gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
           gl.UNSIGNED_SHORT, 0);
 
     }
+  }
+
+  function dataLoadedCallback(data, stats) {
+
+    initModelsFromData(data, stats);
+
+    initCameraFromData(stats);
+
+    render();
   }
 
   // App interface.

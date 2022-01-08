@@ -9,7 +9,9 @@
   <script src="javascripts/jquery-3.6.0.min.js"></script>
   <script src="javascripts/materialize.min.js"></script>
   <script src="javascripts/gl-matrix.js"></script>
-  <script src="javascripts/apple.js"></script>
+  <script src="javascripts/papaparse.js"></script>
+  <script src="javascripts/sphere-daten.js"></script>
+  <script src="javascripts/GVT_Src_Data.js"></script>
   <script src="javascripts/daten-app.js"></script>
 
   <script type="application/javascript">
@@ -61,9 +63,8 @@
 
     function start(phong) {
 
-     loadWegGL('./webgl/vertex-texturen.vs','./webgl/fragment-texturen.fs')
-     var link = document.getElementById('exchangeWebGLLink')
-      app.start()
+     loadWegGL('./webgl/vertex-daten.vs','./webgl/fragment-daten.fs')
+     app.start()
     }
 
   </script>
@@ -90,9 +91,10 @@
     <p><b>A:</b> Bewegung nach Links</p>
     <p><b>D:</b> Bewegung nach Rechts</p>
   </section>
+    <div>
+      <canvas id="c" width="800" height="800"></canvas>
+    </div>
   </div>
-  <h5><a href="http://www.3d-meier.de/tut3/Seite54.html">Apfel Textur</a></h5>
-  <canvas id="c" width="800" height="800"></canvas>
 </section>
 </body>
 
