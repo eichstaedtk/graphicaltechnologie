@@ -1,5 +1,4 @@
-var app = (function () {
-
+var app = (function(){
   var gl;
 
   // The shader program object is also used to
@@ -13,70 +12,67 @@ var app = (function () {
   // Model that is target for user input.
   var interactiveModel;
 
-  var camera = {
-    // Initial position of the camera.
-    // NEW DAT
-    eye: vec3.fromValues(0, 0, 0),
-    //eye: [0, 0, 5],
-    // Point to look at.
-    center : [0, 0, 0],
-    // Opening angle given in radian.
-    // radian = degree*2*PI/360.
-    fovy: 60.0 * Math.PI / 180,
-    // Camera near plane dimensions:
-    // value for left right top bottom in projection.
-    lrtb: 2.0,
-    // View matrix.
-    vMatrix: mat4.create(),
-    // Projection matrix.
-    pMatrix: mat4.create(),
-    // Projection types: orthoData, ortho, perspective, frustum.
-    projectionType: "ortho",
-    // Angle to Z-Axis for camera when orbiting in X-Z-plane.
-    // given in radian.
-    zAngle: 0,
-    // Distance in XZ-Plane from center when orbiting.
-    distance: 4
-  };
+    var camera = {
+        // Initial position of the camera.
+        // NEW DAT
+        eye: vec3.fromValues(0, 0, 0),
+        //eye: [0, 0, 5],
+        // Point to look at.
+        center : [0, 0, 0],
+        // Opening angle given in radian.
+        // radian = degree*2*PI/360.
+        fovy: 60.0 * Math.PI / 180,
+        // Camera near plane dimensions:
+        // value for left right top bottom in projection.
+        lrtb: 2.0,
+        // View matrix.
+        vMatrix: mat4.create(),
+        // Projection matrix.
+        pMatrix: mat4.create(),
+        // Projection types: orthoData, ortho, perspective, frustum.
+        projectionType: "ortho",
+        // Angle to Z-Axis for camera when orbiting in X-Z-plane.
+        // given in radian.
+        zAngle: 0,
+        // Distance in XZ-Plane from center when orbiting.
+        distance: 4
+    };
 
-  // Object with light sources characteristics in the scene.
-  var illumination = {
-    ambientLight: [.2, .2, .2],
-    light: [
-      {isOn:true, position:[-3.,1.,-3.], color:[1.,1.,1.]}
-    ]
-  };
+    // Object with light sources characteristics in the scene.
+    var illumination = {
+        ambientLight: [.2, .2, .2],
+        light: [
+            {isOn:true, position:[-3.,1.,-3.], color:[1.,1.,1.]}
+        ]
+    };
 
   function start() {
-    // NEW DAT
-    Data.init();
+    console.log('Starting the Engine ... ')
+    Data.init()
     init();
     render();
   }
 
   function init() {
+    console.log('Initialize the Engine ....')
     initWebGL();
     initShaderProgram();
-    initUniforms();
+    initUniforms()
     initModels();
     initEventHandler();
     initPipline();
   }
 
   function initWebGL() {
-    // Get canvas and WebGL context.
-    var canvas = document.getElementById('c');
+    console.log('Initialize the WebGL Context from Canvas ....')
+    canvas = document.getElementById('c');
     gl = canvas.getContext('experimental-webgl');
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;
   }
 
-  /**
-   * Init pipeline parameters that will not change again.
-   * If projection or viewport change,
-   * their setup must be in render function.
-   */
   function initPipline() {
+    console.log('Initialize the Pipeline and Camera ....')
     gl.clearColor(.95, .95, .95, 1);
 
     // Backface culling.
@@ -111,53 +107,48 @@ var app = (function () {
     gl.bindAttribLocation(prog, 0, "aPosition");
     gl.linkProgram(prog);
     gl.useProgram(prog);
+
   }
 
-  /**
-   * Create and init shader from source.
-   * @parameter shaderType: openGL shader type.
-   * @parameter SourceTagId: Id of HTML Tag with shader source.
-   * @returns WebGLShader.
-   */
   function initShader(shaderType, SourceTagId) {
     var shader = gl.createShader(shaderType);
     var shaderSource = document.getElementById(SourceTagId).text;
     gl.shaderSource(shader, shaderSource);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.log(SourceTagId + ": " + gl.getShaderInfoLog(shader));
+    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.log(SourceTagId+": "+gl.getShaderInfoLog(shader));
       return null;
     }
     return shader;
   }
 
-  function initUniforms() {
-    // Projection Matrix.
-    prog.pMatrixUniform = gl.getUniformLocation(prog, "uPMatrix");
+    function initUniforms() {
+        // Projection Matrix.
+        prog.pMatrixUniform = gl.getUniformLocation(prog, "uPMatrix");
 
-    // Model-View-Matrix.
-    prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
+        // Model-View-Matrix.
+        prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
 
-    // Normal Matrix.
-    prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
+        // Normal Matrix.
+        prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
 
-    // Color.
-    prog.colorUniform = gl.getUniformLocation(prog, "uColor");
+        // Color.
+        prog.colorUniform = gl.getUniformLocation(prog, "uColor");
 
-    // Light.
-    prog.ambientLightUniform = gl.getUniformLocation(prog, "ambientLight");
-    // Array for light sources uniforms.
-    prog.lightUniform = [];
-    // Loop over light sources.
-    for (var j = 0; j < illumination.light.length; j++) {
-      var lightNb = "light[" + j + "]";
-      // Store one object for every light source.
-      var l = {};
-      l.isOn = gl.getUniformLocation(prog, lightNb + ".isOn");
-      l.position = gl.getUniformLocation(prog, lightNb + ".position");
-      l.color = gl.getUniformLocation(prog, lightNb + ".color");
-      prog.lightUniform[j] = l;
-    }
+        // Light.
+        prog.ambientLightUniform = gl.getUniformLocation(prog, "ambientLight");
+        // Array for light sources uniforms.
+        prog.lightUniform = [];
+        // Loop over light sources.
+        for (var j = 0; j < illumination.light.length; j++) {
+            var lightNb = "light[" + j + "]";
+            // Store one object for every light source.
+            var l = {};
+            l.isOn = gl.getUniformLocation(prog, lightNb + ".isOn");
+            l.position = gl.getUniformLocation(prog, lightNb + ".position");
+            l.color = gl.getUniformLocation(prog, lightNb + ".color");
+            prog.lightUniform[j] = l;
+        }
 
     // Material.
     prog.materialKaUniform = gl.getUniformLocation(prog, "material.ka");
@@ -165,19 +156,20 @@ var app = (function () {
     prog.materialKsUniform = gl.getUniformLocation(prog, "material.ks");
     prog.materialKeUniform = gl.getUniformLocation(prog, "material.ke");
 
-    // Texture.
     prog.textureUniform = gl.getUniformLocation(prog, "uTexture");
   }
 
-  function initTexture(model, filename) {
+  function initTexture(model, image) {
     var texture = gl.createTexture();
     model.texture = texture;
     texture.loaded = false;
-    texture.image = new Image();
-    texture.image.onload = function () {
-      onloadTextureImage(texture);
-    };
-    texture.image.src = filename;
+    if (image) {
+      texture.image = new Image();
+      texture.image.onload = function() {
+        onloadTextureImage(texture);
+      };
+      texture.image.src = image;
+    }
   }
 
   function onloadTextureImage(texture) {
@@ -193,29 +185,20 @@ var app = (function () {
 
     // Set texture parameter.
     // Wrap in S and T direction: CLAMP_TO_EDGE, REPEAT, MIRRORED_REPEAT
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S , gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T , gl.MIRRORED_REPEAT);
     // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
     // Mag Filter: NEAREST,LINEAR
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     // Use mip-Mapping.
     gl.generateMipmap(gl.TEXTURE_2D);
 
-    // Release texture object.
     gl.bindTexture(gl.TEXTURE_2D, null);
 
-    // Update the scene.
     render();
   }
 
-
-  /**
-   * @paramter material : object with optional  ka, kd, ks, ke.
-   * @retrun material : object with ka, kd, ks, ke.
-   */
   function createPhongMaterial(material) {
     material = material || {};
     // Set some default values,
@@ -228,28 +211,19 @@ var app = (function () {
     return material;
   }
 
-  //NEW DAT
-  function initModels() {
-    var fs = "fillwireframe";
-    var mBlue = createPhongMaterial({kd: [0., 0., 1.]});
-    createModel("sphere", fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0], [.5, .5, .5], mBlue);
-    interactiveModel = models[0];
-  }
+    //NEW DAT
+    function initModels() {
+        var fs = "fillwireframe";
+        var mBlue = createPhongMaterial({kd: [0., 0., 1.]});
+        createModel("sphere", fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0], [.5, .5, .5], mBlue);
+        interactiveModel = models[0];
+    }
 
-  //NEW DAT
-  // Create models from data.
-  // Take first 3 fields as position.
-  function initModelsFromData(data, stats) {
+    function initModelsFromData(data, stats) {
     // .. todo
   }
 
-
-  /**
-   * Create model object, fill it and push it in models array.
-   * @parameter geometryname: string with name of geometry.
-   * @parameter fillstyle: wireframe, fill, fillwireframe.
-   */
-  function createModel(geometryname, fillstyle, color, translate, rotate, scale, material, textureFilename) {
+  function createModel(geometryname, fillstyle,color, translate, rotate, scale,material, image,textureFilename) {
     var model = {};
     model.fillstyle = fillstyle;
     model.color = color;
@@ -263,37 +237,25 @@ var app = (function () {
     models.push(model);
   }
 
-  /**
-   * Set scale, rotation and transformation for model.
-   */
   function initTransformations(model, translate, rotate, scale) {
     // Store transformation vectors.
     model.translate = translate;
     model.rotate = rotate;
     model.scale = scale;
 
+    model.nMatrix = mat3.create();
+
     // Create and initialize Model-Matrix.
     model.mMatrix = mat4.create();
 
     // Create and initialize Model-View-Matrix.
     model.mvMatrix = mat4.create();
-
-    // Create and initialize Normal Matrix.
-    model.nMatrix = mat3.create();
   }
 
-  /**
-   * Init data and buffers for model object.
-   * @parameter model: a model object to augment with data.
-   * @parameter geometryname: string with name of geometry.
-   */
   function initDataAndBuffers(model, geometryname) {
-    // Provide model object with vertex data arrays.
-    // Fill data arrays for Vertex-Positions, Normals, Index data:
-    // vertices, normals, indicesLines, indicesTris;
-    // Pointer this refers to the window.
+    console.log('Init Data Buffer '+geometryname)
     this[geometryname]['createVertexData'].apply(model);
-
+    console.log(model)
     // Setup position vertex buffer object.
     model.vboPos = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
@@ -336,113 +298,151 @@ var app = (function () {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   }
 
-  function initEventHandler() {
-    // Rotation step for models.
-    var deltaRotate = Math.PI / 36;
-    var deltaTranslate = 0.05;
-    var deltaScale = 0.05;
+    function initEventHandler() {
+        // Rotation step for models.
+        var deltaRotate = Math.PI / 36;
+        var deltaTranslate = 0.05;
+        var deltaScale = 0.05;
 
-    window.onkeydown = function (evt) {
-      var key = evt.which ? evt.which : evt.keyCode;
-      var c = String.fromCharCode(key);
-      //console.log(evt);
-      // Use shift key to change sign.
-      var sign = evt.shiftKey ? -1 : 1;
+        window.onkeydown = function (evt) {
+            var key = evt.which ? evt.which : evt.keyCode;
+            var c = String.fromCharCode(key);
+            //console.log(evt);
+            // Use shift key to change sign.
+            var sign = evt.shiftKey ? -1 : 1;
 
-      // Rotate interactiveModel.
-      switch(c) {
-        case('X'):
-          interactiveModel.rotate[0] += sign * deltaRotate;
-          break;
-        case('Y'):
-          interactiveModel.rotate[1] += sign * deltaRotate;
-          break;
-        case('Z'):
-          interactiveModel.rotate[2] += sign * deltaRotate;
-          break;
-      }
-      // Scale/squeese interactiveModel.
-      switch(c) {
-        case('S'):
-          interactiveModel.scale[0] *= 1 + sign * deltaScale;
-          interactiveModel.scale[1] *= 1 - sign * deltaScale;
-          interactiveModel.scale[2] *= 1 + sign * deltaScale;
-          break;
-      }
+            // Rotate interactiveModel.
+            switch(c) {
+                case('X'):
+                    interactiveModel.rotate[0] += sign * deltaRotate;
+                    break;
+                case('Y'):
+                    interactiveModel.rotate[1] += sign * deltaRotate;
+                    break;
+                case('Z'):
+                    interactiveModel.rotate[2] += sign * deltaRotate;
+                    break;
+            }
+            // Scale/squeese interactiveModel.
+            switch(c) {
+                case('S'):
+                    interactiveModel.scale[0] *= 1 + sign * deltaScale;
+                    interactiveModel.scale[1] *= 1 - sign * deltaScale;
+                    interactiveModel.scale[2] *= 1 + sign * deltaScale;
+                    break;
+            }
 
-      // Change projection of scene.
-      switch (c) {
-        case('O'):
-          camera.projectionType = "ortho";
-          camera.lrtb = 2;
-          break;
-        case('F'):
-          camera.projectionType = "frustum";
-          camera.lrtb = 1.2;
-          break;
-        case('P'):
-          camera.projectionType = "perspective";
-          break;
-      }
-      // Camera move and orbit.
-      switch (c) {
-        case('C'):
-          // Orbit camera around Y-Axis.
-          camera.zAngle += sign * deltaRotate;
-          break;
-        case('H'):
-          // Move camera up and down.
-          camera.eye[1] += sign * deltaTranslate;
-          break;
-        case('D'):
-          // Camera distance to center.
-          camera.distance += sign * deltaTranslate;
-          break;
-        case('V'):
-          // Camera fovy in radian.
-          camera.fovy += sign * 5 * Math.PI / 180;
-          break;
-        case('B'):
-          // Camera near plane dimensions.
-          camera.lrtb += sign * 0.1;
-          break;
-      }
+            // Change projection of scene.
+            switch (c) {
+                case('O'):
+                    camera.projectionType = "ortho";
+                    camera.lrtb = 2;
+                    break;
+                case('F'):
+                    camera.projectionType = "frustum";
+                    camera.lrtb = 1.2;
+                    break;
+                case('P'):
+                    camera.projectionType = "perspective";
+                    break;
+            }
+            // Camera move and orbit.
+          switch(c) {
+            case('W'):
+              camera.eye[1] += deltaTranslate; //Move the camera to the top
+              break;
+            case('S'):
+              camera.eye[1] -= deltaTranslate; //Move the camera to the bottom
+              break;
+            case('A'):
+              camera.zAngle += deltaRotate; //Move the camera to the left
+              break;
+            case('D'):
+              camera.zAngle -= deltaRotate; //Move the camera to the right
+              break;
+            case('C'):
+              // Orbit camera.
+              camera.zAngle += sign * deltaRotate; //Keystroke C has the same movement of the camera as keystroke A and Shift+C has the same movement of the camera as keystroke D
+              break;
+            case('Q'):
+              camera.distance -= sign * deltaTranslate; //Keystroke Q changes the distance of the camera to the point it looks at
+              break;
+            case('E'):
+              camera.distance += sign * deltaTranslate; //Keystroke E changes the distance of the camera to the point it looks at in the opposite direction to Q
+              break;
+            case('V'):
+              camera.fovy += sign * 5 * Math.PI / 180; //Keystroke V and Shift+V changes the perspective view only in perspective mode (turn on perspective mode with keystroke P)
+              break;
+            case('B'):
+              camera.lrtb += sign * 0.1; //Keystroke B and Shift+B changes the left right top bottom
+              break;
+            case('L'):
+              toggleWireframeOn = !toggleWireframeOn;
+              break;
+            case('I'):
+              moveLightsAroundModels();
+              break;
+            case('K'):
+              animate(sign);
+              break;
+          }
 
-      // NEW DAT
-      // Load data.
-      switch (c) {
-        case('L'):
-          Data.readFileFromClient();
-          // No need to render.
-          return;
-      }
+            // NEW DAT
+            // Load data.
+            switch (c) {
+                case('L'):
+                    Data.readFileFromClient();
+                    // No need to render.
+                    return;
+            }
 
-      // Render the scene again on any key pressed.
-      render();
-    };
+            // Render the scene again on any key pressed.
+            render();
+        };
+    }
+
+  function moveLightsAroundModels() {
+
+    currentLightRotation += deltaRotate;
+    illumination.light[0].position[0] = Math.cos(currentLightRotation) * radiusLights;
+    illumination.light[0].position[2] = Math.sin(currentLightRotation) * radiusLights;
+
   }
 
-  /**
-   * Run the rendering pipeline.
-   */
+  function updateTransformations(model) {
+
+    // Use shortcut variables.
+    var mMatrix = model.mMatrix;
+    var mvMatrix = model.mvMatrix;
+
+    mat4.identity(mMatrix);
+    mat4.identity(mvMatrix);
+
+    mat4.translate(mMatrix, mMatrix, model.translate);
+
+    mat4.rotateX(mMatrix, mMatrix, model.rotate[0]);
+    mat4.rotateY(mMatrix, mMatrix, model.rotate[1]);
+    mat4.rotateZ(mMatrix, mMatrix, model.rotate[2]);
+
+    mat4.scale(mMatrix, mMatrix, model.scale);
+
+    mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
+
+    // Calculate normal matrix from model-view matrix.
+    mat3.normalFromMat4(model.nMatrix, mvMatrix);
+  }
+
   function render() {
+    console.log('Rendering ....')
     // Clear framebuffer and depth-/z-buffer.
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     setProjection();
 
-    // NEW DAT
-    //calculateCameraOrbit();
-
-    // Set view matrix depending on camera.
-    // NEW DAT
-    //mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
-    // NEW DAT
     calculateCamera();
 
-    // Set light uniforms.
     gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
-    // Loop over light sources.
+
     for (var j = 0; j < illumination.light.length; j++) {
       // bool is transferred as integer.
       gl.uniform1i(prog.lightUniform[j].isOn, illumination.light[j].isOn ? 1 : 0);
@@ -459,41 +459,40 @@ var app = (function () {
     }
 
     // Loop over models.
-    for (var i = 0; i < models.length; i++) {
+    for(var i = 0; i < models.length; i++) {
 
-      //NEW DAT IF TEXTURE
       if (models[i].texture && !models[i].texture.loaded) {
         // Leave out this model for now.
         // When the texture is loaded the onload will request a scene update.
         continue;
       }
+
       // Update modelview for model.
       updateTransformations(models[i]);
 
-      // Set uniforms for model.
-      //
-      // Transformation matrices.
-      gl.uniformMatrix4fv(prog.mvMatrixUniform, false, models[i].mvMatrix);
-      gl.uniformMatrix3fv(prog.nMatrixUniform, false, models[i].nMatrix);
-      // Color (not used with lights).
-      gl.uniform4fv(prog.colorUniform, models[i].color);
-      // Material.
-      gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
-      gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
-      gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
-      gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
-      //NEW  DAT
-      //Texture.
-      if (models[i].texture) {
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
-        gl.uniform1i(prog.textureUniform, 0);
-      }
-      draw(models[i]);
+            // Set uniforms for model.
+            //
+            // Transformation matrices.
+            gl.uniformMatrix4fv(prog.mvMatrixUniform, false, models[i].mvMatrix);
+            gl.uniformMatrix3fv(prog.nMatrixUniform, false, models[i].nMatrix);
+            // Color (not used with lights).
+            gl.uniform4fv(prog.colorUniform, models[i].color);
+            // Material.
+            gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
+            gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
+            gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
+            gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
+            //NEW  DAT
+            //Texture.
+            if (models[i].texture) {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
+                gl.uniform1i(prog.textureUniform, 0);
+            }
+            draw(models[i]);
+        }
     }
-  }
 
-  // NEW DAT
   function calculateCamera() {
 
     var vMatrix = camera.vMatrix;
@@ -505,7 +504,6 @@ var app = (function () {
     mat4.translate(vMatrix, vMatrix, trans);
   }
 
-
   function calculateCameraOrbit() {
     // Calculate x,z position/eye of camera orbiting the center.
     var x = 0, z = 2;
@@ -515,10 +513,6 @@ var app = (function () {
     camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
   }
 
-  // NEW DAT
-  /*
-      Consider only the first three fields of our data.
-   */
   function initCameraFromData(stats) {
 
     camera.projectionType = "ortho";
@@ -533,100 +527,100 @@ var app = (function () {
     vec3.copy(camera.eye, stats.mean);
   }
 
-  function setProjection() {
-    var v;
-    // Set projection Matrix.
-    switch (camera.projectionType) {
-        // NEW DAT
-      case("ortho"):
-        v = camera.lrtb;
-        mat4.ortho(camera.pMatrix, -v, v, -v, v, -v, v);
-        break;
-      case("frustum"):
-        v = camera.lrtb;
-        mat4.frustum(camera.pMatrix, -v / 2, v / 2, -v / 2, v / 2, 1, 10);
-        break;
-      case("perspective"):
-        mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, 10);
-        break;
+    function setProjection() {
+        var v;
+        // Set projection Matrix.
+        switch (camera.projectionType) {
+            // NEW DAT
+            case("ortho"):
+                v = camera.lrtb;
+                mat4.ortho(camera.pMatrix, -v, v, -v, v, -v, v);
+                break;
+            case("frustum"):
+                v = camera.lrtb;
+                mat4.frustum(camera.pMatrix, -v / 2, v / 2, -v / 2, v / 2, 1, 10);
+                break;
+            case("perspective"):
+                mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, 10);
+                break;
+        }
+        // Set projection uniform.
+        gl.uniformMatrix4fv(prog.pMatrixUniform, false, camera.pMatrix);
     }
-    // Set projection uniform.
-    gl.uniformMatrix4fv(prog.pMatrixUniform, false, camera.pMatrix);
-  }
 
-  /**
-   * Update model-view matrix for model.
-   */
-  function updateTransformations(model) {
+    /**
+     * Update model-view matrix for model.
+     */
+    function updateTransformations(model) {
 
-    // Use shortcut variables.
-    var mMatrix = model.mMatrix;
-    var mvMatrix = model.mvMatrix;
+        // Use shortcut variables.
+        var mMatrix = model.mMatrix;
+        var mvMatrix = model.mvMatrix;
 
-    // Reset matrices to identity.
-    mat4.identity(mMatrix);
-    mat4.identity(mvMatrix);
+        // Reset matrices to identity.
+        mat4.identity(mMatrix);
+        mat4.identity(mvMatrix);
 
-    // Translate.
-    mat4.translate(mMatrix, mMatrix, model.translate);
-    // Rotate.
-    mat4.rotateX(mMatrix, mMatrix, model.rotate[0]);
-    mat4.rotateY(mMatrix, mMatrix, model.rotate[1]);
-    mat4.rotateZ(mMatrix, mMatrix, model.rotate[2]);
-    // Scale
-    mat4.scale(mMatrix, mMatrix, model.scale);
+        // Translate.
+        mat4.translate(mMatrix, mMatrix, model.translate);
+        // Rotate.
+        mat4.rotateX(mMatrix, mMatrix, model.rotate[0]);
+        mat4.rotateY(mMatrix, mMatrix, model.rotate[1]);
+        mat4.rotateZ(mMatrix, mMatrix, model.rotate[2]);
+        // Scale
+        mat4.scale(mMatrix, mMatrix, model.scale);
 
-    // Combine view and model matrix
-    // by matrix multiplication to mvMatrix.
-    mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
+        // Combine view and model matrix
+        // by matrix multiplication to mvMatrix.
+        mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
 
-    // Calculate normal matrix from model matrix.
-    mat3.normalFromMat4(model.nMatrix, mvMatrix);
-  }
+        // Calculate normal matrix from model matrix.
+        mat3.normalFromMat4(model.nMatrix, mvMatrix);
+    }
 
-  function draw(model) {
-    // Setup position VBO.
-    gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
-    gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT, false, 0, 0);
+    function draw(model) {
+        // Setup position VBO.
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
+        gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT, false, 0, 0);
 
     // Setup normal VBO.
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
     gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
 
-    //NEW DAT IF TEXTURE
+    // Setup texture VBO.
     if (model.texture) {
-      // Setup Texture VBO.
       gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
       gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false, 0, 0);
     }
+
     // Setup rendering tris.
-    var fill = (model.fillstyle.search(/fill/) !== -1);
-    if (fill) {
+    var fill = (model.fillstyle.search(/fill/) != -1);
+    if(fill) {
       gl.enableVertexAttribArray(prog.normalAttrib);
-      //NEW DAT IF TEXTURE
       if (model.texture) {
         gl.enableVertexAttribArray(prog.textureCoordAttrib);
       }
+
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
       gl.drawElements(gl.TRIANGLES, model.iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
     }
 
     // Setup rendering lines.
-    var wireframe = (model.fillstyle.search(/wireframe/) !== -1);
-    if (wireframe) {
-      gl.uniform4fv(prog.colorUniform, [0., 0., 0., 1.]);
+    var wireframe = (model.fillstyle.search(/wireframe/) != -1);
+    if(wireframe) {
+      gl.uniform4fv(prog.colorUniform, [0.,0.,0.,1.]);
       gl.disableVertexAttribArray(prog.normalAttrib);
-      //NEW DAT IF TEXTURE
-      if (model.texture) {
+      if (model.texture)
+      {
         gl.disableVertexAttribArray(prog.textureCoordAttrib);
       }
       gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
       gl.drawElements(gl.LINES, model.iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
     }
   }
 
-  // NEW DAT
   function dataLoadedCallback(data, stats) {
 
     initModelsFromData(data, stats);
@@ -636,11 +630,11 @@ var app = (function () {
     render();
   }
 
-  // App interface.
-  return {
-    start: start,
-    // NEW DAT
-    dataLoadedCallback: dataLoadedCallback
-  };
+    // App interface.
+    return {
+        start: start,
+        // NEW DAT
+        dataLoadedCallback: dataLoadedCallback
+    };
 
 }());
