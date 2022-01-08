@@ -93,7 +93,7 @@ var app = (function(){
     console.log('Starting the Engine ... ')
     Data.init()
     init();
-    Data.readFileFromServer('data/iris/iris.data');
+    Data.readFileFromServer('data/data1018195.csv');
   }
 
     function init() {
@@ -228,16 +228,18 @@ var app = (function(){
     //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
 
-    // Set texture parameter.
-    // Wrap in S and T direction: CLAMP_TO_EDGE, REPEAT, MIRRORED_REPEAT
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S , gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T , gl.MIRRORED_REPEAT);
-    // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    // Mag Filter: NEAREST,LINEAR
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // Use mip-Mapping.
-    gl.generateMipmap(gl.TEXTURE_2D);
+        // Set texture parameter.
+        // Wrap in S and T direction: CLAMP_TO_EDGE, REPEAT, MIRRORED_REPEAT
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+        // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        // Mag Filter: NEAREST,LINEAR
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        // Use mip-Mapping.
+        gl.generateMipmap(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -258,10 +260,10 @@ var app = (function(){
 
     //NEW DAT
     function initModels() {
-        var fs = "fillwireframe";
-        var mBlue = createPhongMaterial({kd: [0., 0., 1.]});
-        createModel("sphere", fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0], [.5, .5, .5], mBlue);
-        interactiveModel = models[0];
+        // var fs = "fillwireframe";
+        //var mBlue = createPhongMaterial({kd: [0., 0., 1.]});
+        //createModel("sphere", fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0], [.5, .5, .5], mBlue);
+        //interactiveModel = models[0];
     }
 
     function initModelsFromData(data, labels, stats) {
@@ -288,7 +290,7 @@ var app = (function(){
         // Set dimension of the projection.
         var l = Math.min(d.length, 3);
         for (var j = 0; j < l; j++) {
-          pos[j] = d[j]-5;
+          pos[j] = d[j];
         }
         // Scale model (like point size) according to data range and data set size.
         var scale = stats.maxRange / 100;
@@ -394,168 +396,145 @@ var app = (function(){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   }
 
-    function initEventHandler() {
-        // Rotation step for models.
-        var deltaRotate = Math.PI / 36;
-        var deltaTranslate = 0.05;
-        var deltaScale = 0.05;
+  function initEventHandler() {
+    // Rotation step for models.
+    var deltaRotate = Math.PI / 36;
+    var deltaTranslate = 0.05;
+    var deltaScale = 0.05;
 
-        window.onkeydown = function (evt) {
-            var key = evt.which ? evt.which : evt.keyCode;
-            var c = String.fromCharCode(key);
-            //console.log(evt);
-            // Use shift key to change sign.
-            var sign = evt.shiftKey ? -1 : 1;
+    window.onkeydown = function (evt) {
+      var key = evt.which ? evt.which : evt.keyCode;
+      var c = String.fromCharCode(key);
+      //console.log(evt);
+      // Use shift key to change sign.
+      var sign = evt.shiftKey ? -1 : 1;
 
-            // NAV BEGIN TEMPLATE OUT SECTION TRANSLATE
-            // Camera translation.
-            var translateStep = camera.lrtb * deltaTranslate;
-            switch (c) {
-                // Move the camera position.
-                case('W'):
-                    camera.translate([0, -translateStep, 0]);
-                    break;
-                case('A'):
-                    camera.translate([translateStep, 0, 0]);
-                    break;
-                case('S'):
-                    camera.translate([0, translateStep, 0]);
-                    break;
-                case('D'):
-                    camera.translate([-translateStep, 0, 0]);
-                    break;
-                case(' '):
-                    camera.translate([0, 0, translateStep]);
-                    break;
-            }
-            // NAV END TEMPLATE OUT SECTION TRANSLATE
+      // NAV BEGIN TEMPLATE OUT SECTION TRANSLATE
+      // Camera translation.
+      var translateStep = camera.lrtb * deltaTranslate;
+      switch (c) {
+          // Move the camera position.
+        case('W'):
+          camera.translate([0, -translateStep, 0]);
+          break;
+        case('A'):
+          camera.translate([translateStep, 0, 0]);
+          break;
+        case('S'):
+          camera.translate([0, translateStep, 0]);
+          break;
+        case('D'):
+          camera.translate([-translateStep, 0, 0]);
+          break;
+        case(' '):
+          camera.translate([0, 0, translateStep]);
+          break;
+      }
+      // NAV END TEMPLATE OUT SECTION TRANSLATE
 
-            // NAV BEGIN TEMPLATE COMMENT IN
-            /*
-            // Rotate interactiveModel.
-            switch(c) {
-                case('X'):
-                    interactiveModel.rotate[0] += sign * deltaRotate;
-                    break;
-                case('Y'):
-                    interactiveModel.rotate[1] += sign * deltaRotate;
-                    break;
-                case('Z'):
-                    interactiveModel.rotate[2] += sign * deltaRotate;
-                    break;
-            }
-            */
-            // NAV END TEMPLATE COMMENT IN
+      // NAV BEGIN TEMPLATE COMMENT IN
+      /*
+      // Rotate interactiveModel.
+      switch(c) {
+          case('X'):
+              interactiveModel.rotate[0] += sign * deltaRotate;
+              break;
+          case('Y'):
+              interactiveModel.rotate[1] += sign * deltaRotate;
+              break;
+          case('Z'):
+              interactiveModel.rotate[2] += sign * deltaRotate;
+              break;
+      }
+      */
+      // NAV END TEMPLATE COMMENT IN
 
-            // NAV BEGIN TEMPLATE OUT SECTION ROTATE
-            // Rotate.
-            var rotateStep = deltaRotate * sign;
-            switch (c) {
-                case('X'):
-                    if (!interactiveModel)
-                    //camera.rotate[0] += rotateStep;
-                        camera.rotateX(rotateStep);
-                    else
-                        interactiveModel.rotate[0] += rotateStep;
-                    break;
-                case('Y'):
-                    if (!interactiveModel)
-                    //camera.rotate[1] += rotateStep;
-                        camera.rotateY(rotateStep);
-                    else
-                        interactiveModel.rotate[1] += rotateStep;
-                    break;
-                case('Z'):
-                    if (!interactiveModel)
-                    // camera.rotate[2] += rotateStep;
-                        camera.rotateZ(rotateStep);
-                    else
-                        interactiveModel.rotate[2] += rotateStep;
-                    break;
-            }
-            // NAV END TEMPLATE OUT SECTION ROTATE
+      // NAV BEGIN TEMPLATE OUT SECTION ROTATE
+      // Rotate.
+      var rotateStep = deltaRotate * sign;
+      switch (c) {
+        case('X'):
+          if (!interactiveModel)
+              //camera.rotate[0] += rotateStep;
+            camera.rotateX(rotateStep);
+          else
+            interactiveModel.rotate[0] += rotateStep;
+          break;
+        case('Y'):
+          if (!interactiveModel)
+              //camera.rotate[1] += rotateStep;
+            camera.rotateY(rotateStep);
+          else
+            interactiveModel.rotate[1] += rotateStep;
+          break;
+        case('Z'):
+          if (!interactiveModel)
+              // camera.rotate[2] += rotateStep;
+            camera.rotateZ(rotateStep);
+          else
+            interactiveModel.rotate[2] += rotateStep;
+          break;
+      }
+      // NAV END TEMPLATE OUT SECTION ROTATE
 
-            // Scale interactiveModel.
-            switch (c) {
-                case('S'):
-                    // NEW NAV
-                    if (interactiveModel) {
-                        interactiveModel.scale[0] *= 1 + sign * deltaScale;
-                        interactiveModel.scale[1] *= 1 - sign * deltaScale;
-                        interactiveModel.scale[2] *= 1 + sign * deltaScale;
-                    }
-                    break;
-            }
-            // Change projection of scene.
-            switch (c) {
-                case('O'):
-                    camera.projectionType = "ortho";
-                    camera.lrtb = 2;
-                    break;
-                case('F'):
-                    camera.projectionType = "frustum";
-                    camera.lrtb = 1.2;
-                    break;
-                case('P'):
-                    camera.projectionType = "perspective";
-                    break;
-            }
-            // Camera move and orbit.
-            switch (c) {
-                case('C'):
-                    // Orbit camera around Y-Axis.
-                    camera.zAngle += sign * deltaRotate;
-                    break;
-                case('H'):
-                    // Move camera up and down.
-                    camera.eye[1] += sign * deltaTranslate;
-                    break;
-                case('D'):
-                    // Camera distance to center.
-                    camera.distance += sign * deltaTranslate;
-                    break;
-                case('V'):
-                    // Camera fovy in radian.
-                    camera.fovy += sign * 5 * Math.PI / 180;
-                    break;
-                case('B'):
-                    // Zoom in and out of the data.
-                    // NEW DIM
-                    var factor = 1.0 - sign * 0.1;
-                    camera.lrtb *= factor;
-                    rescaleModels(factor);
-                    break;
-            }
+      // Change projection of scene.
+      switch (c) {
+        case('O'):
+          camera.projectionType = "ortho";
+          camera.lrtb = 2;
+          break;
+        case('F'):
+          camera.projectionType = "frustum";
+          camera.lrtb = 1.2;
+          break;
+        case('P'):
+          camera.projectionType = "perspective";
+          break;
+      }
+      // Camera move and orbit.
+      switch (c) {
+        case('V'):
+          // Camera fovy in radian.
+          camera.fovy += sign * 5 * Math.PI / 180;
+          break;
+        case('B'):
+          // Zoom in and out of the data.
+          // NEW DIM
+          var factor = 1.0 - sign * 0.1;
+          camera.lrtb *= factor;
+          rescaleModels(factor);
+          break;
+      }
 
-            // Load data.
-            switch (c) {
-                case('L'):
-                    Data.readFileFromClient();
-                    // No need to render, done in callback.
-                    return;
-            }
+      // Load data.
+      switch (c) {
+        case('L'):
+          Data.readFileFromClient();
+          // No need to render, done in callback.
+          return;
+      }
 
-            // NEW DIM
-            // Save Data
-            switch (c) {
-                case('K'):
-                    Data.setData(tSNE.getSolution());
-                    Data.downloadData();
-                    // No need to render.
-                    return;
-            }
-            // NEW DIM
-            // tSNE.
-            switch (c) {
-                case('T'):
-                    step_tSNE(1);
-                    break;
-            }
+      // NEW DIM
+      // Save Data
+      switch (c) {
+        case('K'):
+          Data.setData(tSNE.getSolution());
+          Data.downloadData();
+          // No need to render.
+          return;
+      }
+      // NEW DIM
+      // tSNE.
+      switch (c) {
+        case('T'):
+          step_tSNE(1);
+          break;
+      }
 
 
-            // Render the scene again on any key pressed.
-            render();
-        };
+      // Render the scene again on any key pressed.
+      render();
+    };
   }
 
   function moveLightsAroundModels() {
@@ -601,34 +580,38 @@ var app = (function(){
         // Set view matrix depending on camera.
         //mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
-    gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
+        // NAV BEGIN TEMPLATE COMMENT IN
+        //calculateCamera();
+        // NAV END TEMPLATE COMMENT IN
 
-    for (var j = 0; j < illumination.light.length; j++) {
-      // bool is transferred as integer.
-      gl.uniform1i(prog.lightUniform[j].isOn, illumination.light[j].isOn ? 1 : 0);
-      // Tranform light position in eye coordinates.
-      // Copy current light position into a new array.
-      var lightPos = [].concat(illumination.light[j].position);
-      // Add homogeneous coordinate for transformation.
-      lightPos.push(1.0);
-      vec4.transformMat4(lightPos, lightPos, camera.vMatrix);
-      // Remove homogeneous coordinate.
-      lightPos.pop();
-      gl.uniform3fv(prog.lightUniform[j].position, lightPos);
-      gl.uniform3fv(prog.lightUniform[j].color, illumination.light[j].color);
-    }
+        // Set light uniforms.
+        gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
+        // Loop over light sources.
+        for (var j = 0; j < illumination.light.length; j++) {
+            // bool is transferred as integer.
+            gl.uniform1i(prog.lightUniform[j].isOn, illumination.light[j].isOn ? 1 : 0);
+            // Tranform light position in eye coordinates.
+            // Copy current light position into a new array.
+            var lightPos = [].concat(illumination.light[j].position);
+            // Add homogeneous coordinate for transformation.
+            lightPos.push(1.0);
+            vec4.transformMat4(lightPos, lightPos, camera.vMatrix);
+            // Remove homogeneous coordinate.
+            lightPos.pop();
+            gl.uniform3fv(prog.lightUniform[j].position, lightPos);
+            gl.uniform3fv(prog.lightUniform[j].color, illumination.light[j].color);
+        }
 
-    // Loop over models.
-    for(var i = 0; i < models.length; i++) {
+        // Loop over models.
+        for (var i = 0; i < models.length; i++) {
 
-      if (models[i].texture && !models[i].texture.loaded) {
-        // Leave out this model for now.
-        // When the texture is loaded the onload will request a scene update.
-        continue;
-      }
-
-      // Update modelview for model.
-      updateTransformations(models[i]);
+            if (models[i].texture && !models[i].texture.loaded) {
+                // Leave out this model for now.
+                // When the texture is loaded the onload will request a scene update.
+                continue;
+            }
+            // Update modelview for model.
+            updateTransformations(models[i]);
 
             // Set uniforms for model.
             //
@@ -642,7 +625,7 @@ var app = (function(){
             gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
             gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
             gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
-            //NEW  DAT
+
             //Texture.
             if (models[i].texture) {
                 gl.activeTexture(gl.TEXTURE0);
@@ -675,10 +658,28 @@ var app = (function(){
 
   function initCameraFromData(stats) {
 
-    camera.projectionType = "ortho";
-    camera.lrtb = stats.maxRange;
-    camera.distance = 0;
-    vec3.copy(camera.eye, stats.mean);
+        camera.projectionType = "ortho";
+        // NAV BEGIN TEMPLATE IN SECTION FLIGHT
+        //camera.projectionType = "perspective";
+        // NAV END TEMPLATE IN SECTION FLIGHT
+
+        // Set Frustum according to data range.
+        // Use same extend in all dimensions to keep data ratio.
+        camera.lrtb = stats.maxRange;
+        camera.distance = 0;
+
+        // Locate the camera (eye) in the center of the data to rotate it.
+        // Data points inside the ortho frustum are all rendered.
+        vec3.copy(camera.eye, stats.mean);
+
+        // NAV BEGIN TEMPLATE OUT SECTION ROTATE
+        var vMatrix = camera.vMatrix;
+        mat4.identity(vMatrix);
+
+    // Translate.
+    var trans = vec3.clone(camera.eye);
+    vec3.scale(trans, trans, -1.0);
+    mat4.translate(vMatrix, vMatrix, trans);
   }
 
     function setProjection() {
@@ -785,7 +786,7 @@ var app = (function(){
   function init_tSNE(data) {
     var opt = {};
     opt.epsilon = 10; // epsilon is learning rate (10 = default)
-    opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+    opt.perplexity = 18; // roughly how many neighbors each point influences (30 = default)
     opt.dim = 3; // dimensionality of the embedding (2 = default)
 
     tSNE = new tsnejs.tSNE(opt); // create a tSNE instance
