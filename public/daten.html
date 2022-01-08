@@ -10,6 +10,7 @@
   <script src="javascripts/materialize.min.js"></script>
   <script src="javascripts/gl-matrix.js"></script>
   <script src="javascripts/papaparse.js"></script>
+  <script src="javascripts/tsne.js"></script>
   <script src="javascripts/sphere-daten.js"></script>
   <script src="javascripts/GVT_Src_Data.js"></script>
   <script src="javascripts/daten-app.js"></script>
@@ -75,7 +76,7 @@
 <body onload="start()">
 <section>
   <h1>EA 10 - Seeds Daten in 3D Konrad Eichstädt THB</h1>
-  <div style="height: 180px">
+  <div style="height: 200px; width: 100%">
   <section style="width: 50%; float: left">
     Steuerung Tastatur
     <p><b>O:</b> Ortogonale Ansicht</p>
@@ -91,11 +92,20 @@
     <p><b>A:</b> Bewegung nach Links</p>
     <p><b>D:</b> Bewegung nach Rechts</p>
   </section>
-    <div>
-      <canvas id="c" width="800" height="800"></canvas>
-    </div>
+  </div>
+  <div style="width: 100%">
+    <section style="width: 50%; float: left">
+      <canvas id="c" width="800" height="800" style="float: left"></canvas>
+    </section>
+    <section style="width: 50%;float: right">
+    <span id="experiment"></span>
+    <span id="para"></span>
+    <span id="step"></span>
+    </section>
   </div>
 </section>
+<br/>
+</body>
 </body>
 
 </html>

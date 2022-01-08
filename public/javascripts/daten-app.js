@@ -18,7 +18,10 @@ var app = (function(){
         eye: vec3.fromValues(0, 0, 0),
         //eye: [0, 0, 5],
         // Point to look at.
-        center : [0, 0, 0],
+        center: [0, 0, 0],
+        // NAV BEGIN TEMPLATE OUT EXERCISE EULER
+        rotate: [0, 0, 0],
+        // NAV END TEMPLATE OUT EXERCISE EULER
         // Opening angle given in radian.
         // radian = degree*2*PI/360.
         fovy: 60.0 * Math.PI / 180,
@@ -35,7 +38,45 @@ var app = (function(){
         // given in radian.
         zAngle: 0,
         // Distance in XZ-Plane from center when orbiting.
-        distance: 4
+        distance: 4,
+
+        // NAV BEGIN TEMPLATE OUT SECTION ROTATE
+        // Comment out when the function factory in not in place.
+        /*
+        translate: function (vec) {
+            var M = mat4.create();
+            mat4.translate(M, M, vec);
+            mat4.multiply(this.vMatrix, M, this.vMatrix);
+        },
+        rotateX: function (angle) {
+            var M = mat4.create();
+            mat4.rotateX(M, M, angle);
+            mat4.multiply(this.vMatrix, M, this.vMatrix);
+        },
+        rotateY: function (angle) {
+            var M = mat4.create();
+            mat4.rotateY(M, M, angle);
+            mat4.multiply(this.vMatrix, M, this.vMatrix);
+        },
+        rotateZ: function (angle) {
+            var M = mat4.create();
+            mat4.rotateZ(M, M, angle);
+            mat4.multiply(this.vMatrix, M, this.vMatrix);
+        },
+        */
+        // NAV END TEMPLATE OUT SECTION ROTATE
+        // NAV BEGIN TEMPLATE OUT EXERCISE FUNCTION FACTORY
+        // Function factory for the above translate, rotate functions.
+        init: function () {
+            ["translate", "rotateX", "rotateY", "rotateZ"].forEach(function (f) {
+                camera[f] = function (val) {
+                    var M = mat4.create();
+                    mat4[f](M, M, val);
+                    mat4.multiply(this.vMatrix, M, this.vMatrix);
+                }
+            });
+        }
+        // NAV END TEMPLATE OUT EXERCISE FUNCTION FACTORY
     };
 
     // Object with light sources characteristics in the scene.
@@ -46,22 +87,26 @@ var app = (function(){
         ]
     };
 
+  var tSNE;
+
   function start() {
     console.log('Starting the Engine ... ')
     Data.init()
     init();
-    render();
+    Data.readFileFromServer('data/iris/iris.data');
   }
 
-  function init() {
-    console.log('Initialize the Engine ....')
-    initWebGL();
-    initShaderProgram();
-    initUniforms()
-    initModels();
-    initEventHandler();
-    initPipline();
-  }
+    function init() {
+        // NAV BEGIN TEMPLATE OUT EXERCISE FUNCTION FACTORY
+        camera.init();
+        // NAV END TEMPLATE OUT EXERCISE FUNCTION FACTORY
+        initWebGL();
+        initShaderProgram();
+        initUniforms();
+        initModels();
+        initEventHandler();
+        initPipline();
+    }
 
   function initWebGL() {
     console.log('Initialize the WebGL Context from Canvas ....')
@@ -219,8 +264,59 @@ var app = (function(){
         interactiveModel = models[0];
     }
 
-    function initModelsFromData(data, stats) {
-    // .. todo
+    function initModelsFromData(data, labels, stats) {
+      var fs = "fill";
+
+      var mRed = createPhongMaterial({kd: [1., 0., 0.]});
+      var mGreen = createPhongMaterial({kd: [0., 1., 0.]});
+      var mBlue = createPhongMaterial({kd: [0., 0., 1.]});
+      var mYellow = createPhongMaterial({kd: [1., 1., 0.]});
+      var mCyan = createPhongMaterial({kd: [0., 1., 1.]});
+      var mMagenta = createPhongMaterial({kd: [1., 0., 1.]});
+      //var mWhite = createPhongMaterial({kd: [1., 1., 1.]});
+
+      var materials = [mRed, mGreen, mBlue, mYellow, mCyan, mMagenta];
+
+      // Clear models for new data
+      models = [];
+      for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        // Set color according to classification.
+        // NEW DIM
+        var pos = Array(3).fill(0);
+        //var pos = [d[0], d[1], d[2]];
+        // Set dimension of the projection.
+        var l = Math.min(d.length, 3);
+        for (var j = 0; j < l; j++) {
+          pos[j] = d[j]-5;
+        }
+        // Scale model (like point size) according to data range and data set size.
+        var scale = stats.maxRange / 100;
+        //var scale = stats.maxRange / 100 * camera.lrtb;
+        //var scale = Math.max(stats.maxRange / 100, camera.lrtb * 0.01);
+        var scale3f = [scale, scale, scale];
+        createModel("sphere", fs, [1, 1, 1, 1], pos, [0, 0, 0], scale3f, materials[labels[i]]);
+      }
+  }
+
+  function setModelTransformationFromData(data) {
+    for (var i = 0; i < data.length; i++) {
+      var d = data[i];
+      var pos = Array(3).fill(0);
+      var l = Math.min(d.length, 3);
+      for (var j = 0; j < l; j++) {
+        pos[j] = d[j];
+      }
+      models[i].translate = pos;
+    }
+  }
+
+  function rescaleModels(factor) {
+    for (var i = 0; i < models.length; i++) {
+      models[i].scale[0] *= factor;
+      models[i].scale[1] *= factor;
+      models[i].scale[2] *= factor;
+    }
   }
 
   function createModel(geometryname, fillstyle,color, translate, rotate, scale,material, image,textureFilename) {
@@ -311,6 +407,31 @@ var app = (function(){
             // Use shift key to change sign.
             var sign = evt.shiftKey ? -1 : 1;
 
+            // NAV BEGIN TEMPLATE OUT SECTION TRANSLATE
+            // Camera translation.
+            var translateStep = camera.lrtb * deltaTranslate;
+            switch (c) {
+                // Move the camera position.
+                case('W'):
+                    camera.translate([0, -translateStep, 0]);
+                    break;
+                case('A'):
+                    camera.translate([translateStep, 0, 0]);
+                    break;
+                case('S'):
+                    camera.translate([0, translateStep, 0]);
+                    break;
+                case('D'):
+                    camera.translate([-translateStep, 0, 0]);
+                    break;
+                case(' '):
+                    camera.translate([0, 0, translateStep]);
+                    break;
+            }
+            // NAV END TEMPLATE OUT SECTION TRANSLATE
+
+            // NAV BEGIN TEMPLATE COMMENT IN
+            /*
             // Rotate interactiveModel.
             switch(c) {
                 case('X'):
@@ -323,15 +444,48 @@ var app = (function(){
                     interactiveModel.rotate[2] += sign * deltaRotate;
                     break;
             }
-            // Scale/squeese interactiveModel.
-            switch(c) {
-                case('S'):
-                    interactiveModel.scale[0] *= 1 + sign * deltaScale;
-                    interactiveModel.scale[1] *= 1 - sign * deltaScale;
-                    interactiveModel.scale[2] *= 1 + sign * deltaScale;
+            */
+            // NAV END TEMPLATE COMMENT IN
+
+            // NAV BEGIN TEMPLATE OUT SECTION ROTATE
+            // Rotate.
+            var rotateStep = deltaRotate * sign;
+            switch (c) {
+                case('X'):
+                    if (!interactiveModel)
+                    //camera.rotate[0] += rotateStep;
+                        camera.rotateX(rotateStep);
+                    else
+                        interactiveModel.rotate[0] += rotateStep;
+                    break;
+                case('Y'):
+                    if (!interactiveModel)
+                    //camera.rotate[1] += rotateStep;
+                        camera.rotateY(rotateStep);
+                    else
+                        interactiveModel.rotate[1] += rotateStep;
+                    break;
+                case('Z'):
+                    if (!interactiveModel)
+                    // camera.rotate[2] += rotateStep;
+                        camera.rotateZ(rotateStep);
+                    else
+                        interactiveModel.rotate[2] += rotateStep;
                     break;
             }
+            // NAV END TEMPLATE OUT SECTION ROTATE
 
+            // Scale interactiveModel.
+            switch (c) {
+                case('S'):
+                    // NEW NAV
+                    if (interactiveModel) {
+                        interactiveModel.scale[0] *= 1 + sign * deltaScale;
+                        interactiveModel.scale[1] *= 1 - sign * deltaScale;
+                        interactiveModel.scale[2] *= 1 + sign * deltaScale;
+                    }
+                    break;
+            }
             // Change projection of scene.
             switch (c) {
                 case('O'):
@@ -347,59 +501,62 @@ var app = (function(){
                     break;
             }
             // Camera move and orbit.
-          switch(c) {
-            case('W'):
-              camera.eye[1] += deltaTranslate; //Move the camera to the top
-              break;
-            case('S'):
-              camera.eye[1] -= deltaTranslate; //Move the camera to the bottom
-              break;
-            case('A'):
-              camera.zAngle += deltaRotate; //Move the camera to the left
-              break;
-            case('D'):
-              camera.zAngle -= deltaRotate; //Move the camera to the right
-              break;
-            case('C'):
-              // Orbit camera.
-              camera.zAngle += sign * deltaRotate; //Keystroke C has the same movement of the camera as keystroke A and Shift+C has the same movement of the camera as keystroke D
-              break;
-            case('Q'):
-              camera.distance -= sign * deltaTranslate; //Keystroke Q changes the distance of the camera to the point it looks at
-              break;
-            case('E'):
-              camera.distance += sign * deltaTranslate; //Keystroke E changes the distance of the camera to the point it looks at in the opposite direction to Q
-              break;
-            case('V'):
-              camera.fovy += sign * 5 * Math.PI / 180; //Keystroke V and Shift+V changes the perspective view only in perspective mode (turn on perspective mode with keystroke P)
-              break;
-            case('B'):
-              camera.lrtb += sign * 0.1; //Keystroke B and Shift+B changes the left right top bottom
-              break;
-            case('L'):
-              toggleWireframeOn = !toggleWireframeOn;
-              break;
-            case('I'):
-              moveLightsAroundModels();
-              break;
-            case('K'):
-              animate(sign);
-              break;
-          }
+            switch (c) {
+                case('C'):
+                    // Orbit camera around Y-Axis.
+                    camera.zAngle += sign * deltaRotate;
+                    break;
+                case('H'):
+                    // Move camera up and down.
+                    camera.eye[1] += sign * deltaTranslate;
+                    break;
+                case('D'):
+                    // Camera distance to center.
+                    camera.distance += sign * deltaTranslate;
+                    break;
+                case('V'):
+                    // Camera fovy in radian.
+                    camera.fovy += sign * 5 * Math.PI / 180;
+                    break;
+                case('B'):
+                    // Zoom in and out of the data.
+                    // NEW DIM
+                    var factor = 1.0 - sign * 0.1;
+                    camera.lrtb *= factor;
+                    rescaleModels(factor);
+                    break;
+            }
 
-            // NEW DAT
             // Load data.
             switch (c) {
                 case('L'):
                     Data.readFileFromClient();
+                    // No need to render, done in callback.
+                    return;
+            }
+
+            // NEW DIM
+            // Save Data
+            switch (c) {
+                case('K'):
+                    Data.setData(tSNE.getSolution());
+                    Data.downloadData();
                     // No need to render.
                     return;
             }
+            // NEW DIM
+            // tSNE.
+            switch (c) {
+                case('T'):
+                    step_tSNE(1);
+                    break;
+            }
+
 
             // Render the scene again on any key pressed.
             render();
         };
-    }
+  }
 
   function moveLightsAroundModels() {
 
@@ -439,7 +596,10 @@ var app = (function(){
 
     setProjection();
 
-    calculateCamera();
+        //calculateCameraOrbit();
+
+        // Set view matrix depending on camera.
+        //mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
     gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
 
@@ -516,14 +676,8 @@ var app = (function(){
   function initCameraFromData(stats) {
 
     camera.projectionType = "ortho";
-
-    // Set Frustum according to data range.
-    // Use same extend in all dimensions to keep data ratio.
     camera.lrtb = stats.maxRange;
     camera.distance = 0;
-
-    // Locate the camera (eye) in the center of the data.
-    // Data points inside the ortho frustum are all rendered.
     vec3.copy(camera.eye, stats.mean);
   }
 
@@ -535,6 +689,9 @@ var app = (function(){
             case("ortho"):
                 v = camera.lrtb;
                 mat4.ortho(camera.pMatrix, -v, v, -v, v, -v, v);
+                // NAV BEGIN TEMPLATE OUT SECTION ZOOM
+                mat4.ortho(camera.pMatrix, -v, v, -v, v, -1000, 1000);
+                // NAV END TEMPLATE OUT SECTION ZOOM
                 break;
             case("frustum"):
                 v = camera.lrtb;
@@ -542,6 +699,9 @@ var app = (function(){
                 break;
             case("perspective"):
                 mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, 10);
+                // NAV BEGIN TEMPLATE OUT SECTION FLIGHT
+                mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, camera.lrtb);
+                // NAV END TEMPLATE OUT SECTION FLIGHT
                 break;
         }
         // Set projection uniform.
@@ -621,13 +781,63 @@ var app = (function(){
     }
   }
 
-  function dataLoadedCallback(data, stats) {
+  // NEW DIM
+  function init_tSNE(data) {
+    var opt = {};
+    opt.epsilon = 10; // epsilon is learning rate (10 = default)
+    opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+    opt.dim = 3; // dimensionality of the embedding (2 = default)
 
-    initModelsFromData(data, stats);
+    tSNE = new tsnejs.tSNE(opt); // create a tSNE instance
 
+    // Init from raw data (do not from a distance matrix, which is an other option).
+    // The data is stored within t-SNE. Thus the data object can be re-used.
+    tSNE.initDataRaw(data);
+
+    displayParameter_tSNE();
+    displayStepCounter_tSNE();
+  }
+
+  // NEW DIM
+  function step_tSNE(nbSteps) {
+    nbSteps = (typeof nbSteps !== 'undefined') ? nbSteps : 1;
+
+    for (var k = 0; k < nbSteps; k++) {
+      tSNE.step();
+    }
+    var map = tSNE.getSolution();
+
+    setModelTransformationFromData(map);
+
+    // The Data gets centered by tSNE,
+    // thus we reset the camera translation to the origin.
+    if(tSNE.iter === 1) { mat4.identity(camera.vMatrix); }
+
+    displayStepCounter_tSNE();
+  }
+
+  // NEW DIM
+  function displayParameter_tSNE() {
+    // Display parameter.
+    var elem = document.getElementById('para');
+    elem.innerHTML = " epsilon:"+ tSNE.epsilon;
+    elem.innerHTML += " perplexity:"+ tSNE.perplexity;
+    elem.innerHTML += " dim:"+ tSNE.dim;
+  }
+
+  // NEW DIM
+  function displayStepCounter_tSNE() {
+    var elem = document.getElementById('step');
+    elem.innerHTML = " step:" + tSNE.iter;
+  }
+
+  function dataLoadedCallback(data, labels, stats) {
+
+    initModelsFromData(data, labels, stats);
     initCameraFromData(stats);
-
     render();
+
+    init_tSNE(data);
   }
 
     // App interface.
